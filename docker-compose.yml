@@ -1,0 +1,19 @@
+# FlightFlow — copy config.example.yaml to config.yaml, edit it, then:  docker compose up -d
+services:
+  flightflow:
+    image: ghcr.io/alfredomanjon/flightflow:latest
+    container_name: flightflow
+    restart: unless-stopped
+    ports:
+      - "${FLIGHTFLOW_PORT:-8080}:8080"
+      # Same host as the receiver, behind lighttpd/nginx: expose it only locally instead.
+      # - "127.0.0.1:8080:8080"
+    volumes:
+      - ./config.yaml:/config/config.yaml:ro
+      - ./data:/data
+    # Same host as the receiver: lets config.yaml use receiver.url: http://host.docker.internal/tar1090
+    # extra_hosts:
+    #   - "host.docker.internal:host-gateway"
+    # Keep secrets out of config.yaml: put FLIGHTFLOW_DATABASE_URL=... in a .env file (chmod 600).
+    # env_file:
+    #   - .env

@@ -1,0 +1,6 @@
+# Build the image from your local checkout instead of pulling it:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+services:
+  flightflow:
+    image: flightflow:dev
+    build: .

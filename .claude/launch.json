@@ -1,0 +1,35 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "flightflow",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "cd services/collector && FLIGHTFLOW_CONFIG=../../config.yaml FLIGHTFLOW_DATA_DIR=../../data .venv/bin/flightflow serve --port 8080"],
+      "port": 8080
+    },
+    {
+      "name": "collector-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev:collector"],
+      "port": 8001
+    },
+    {
+      "name": "map-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev:map"],
+      "port": 5173
+    },
+    {
+      "name": "analytics-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev:analytics"],
+      "port": 5174
+    },
+    {
+      "name": "portrait-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev:portrait"],
+      "port": 5175
+    }
+  ]
+}

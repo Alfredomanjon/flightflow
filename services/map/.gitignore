@@ -1,0 +1,13 @@
+node_modules
+dist
+.vite
+.DS_Store
+*.log
+.env
+
+# Artefactos de build y tooling local
+tsconfig.tsbuildinfo
+.claude/
+
+# Lógica de despliegue personal (rsync/SSH a tu propio host) — no se publica.
+private/

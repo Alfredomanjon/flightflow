@@ -1,0 +1,27 @@
+# Your configuration and data stay local
+/config.yaml
+/data/
+.env
+.env.*
+
+# Dependencies and builds
+node_modules/
+dist/
+.vite/
+*.tsbuildinfo
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/
+*.log
+
+# Airline logos are trademarks and are never committed (see NOTICE)
+**/public/logos/

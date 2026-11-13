@@ -1,0 +1,137 @@
+{
+  "RYR": {
+    "name": "Ryanair",
+    "color": "#073590",
+    "iata": "FR"
+  },
+  "VLG": {
+    "name": "Vueling",
+    "color": "#FFD100",
+    "iata": "VY"
+  },
+  "IBE": {
+    "name": "Iberia",
+    "color": "#CC0000",
+    "iata": "IB"
+  },
+  "IBS": {
+    "name": "Iberia Express",
+    "color": "#E05A00",
+    "iata": "I2"
+  },
+  "ANE": {
+    "name": "Air Nostrum",
+    "color": "#004B87",
+    "iata": "YW"
+  },
+  "AEA": {
+    "name": "Air Europa",
+    "color": "#003087",
+    "iata": "UX"
+  },
+  "EJU": {
+    "name": "easyJet Europe",
+    "color": "#FF6600",
+    "iata": "EC"
+  },
+  "EZY": {
+    "name": "easyJet",
+    "color": "#FF6600",
+    "iata": "U2"
+  },
+  "WZZ": {
+    "name": "Wizz Air",
+    "color": "#C8008F",
+    "iata": "W6"
+  },
+  "WMT": {
+    "name": "Wizz Air Malta",
+    "color": "#C8008F",
+    "iata": "W6"
+  },
+  "BAW": {
+    "name": "British Airways",
+    "color": "#075AAA",
+    "iata": "BA"
+  },
+  "DLH": {
+    "name": "Lufthansa",
+    "color": "#05164D",
+    "iata": "LH"
+  },
+  "AFR": {
+    "name": "Air France",
+    "color": "#002157",
+    "iata": "AF"
+  },
+  "KLM": {
+    "name": "KLM",
+    "color": "#009DE0",
+    "iata": "KL"
+  },
+  "TAP": {
+    "name": "TAP Portugal",
+    "color": "#016A3B",
+    "iata": "TP"
+  },
+  "THY": {
+    "name": "Turkish Airlines",
+    "color": "#C8102E",
+    "iata": "TK"
+  },
+  "RAM": {
+    "name": "Royal Air Maroc",
+    "color": "#006233",
+    "iata": "AT"
+  },
+  "SWT": {
+    "name": "Swiftair",
+    "color": "#E30613",
+    "iata": "WT"
+  },
+  "NSZ": {
+    "name": "Nesma Airlines",
+    "color": "#8B4513",
+    "iata": "NE"
+  },
+  "BEL": {
+    "name": "Brussels Airlines",
+    "color": "#CC0000",
+    "iata": "SN"
+  },
+  "SAS": {
+    "name": "SAS",
+    "color": "#000099",
+    "iata": "SK"
+  },
+  "TOM": {
+    "name": "TUI Airways",
+    "color": "#E2001A",
+    "iata": "BY"
+  },
+  "CFG": {
+    "name": "Condor",
+    "color": "#FFCC00",
+    "iata": "DE"
+  },
+  "LVL": {
+    "name": "Volotea",
+    "color": "#1A237E",
+    "iata": "V7"
+  },
+  "TAR": {
+    "name": "Tunisair",
+    "color": "#E32119",
+    "iata": "TU"
+  },
+  "TRA": {
+    "name": "Transavia",
+    "color": "#07CD78",
+    "iata": "HV"
+  },
+  "TVF": {
+    "name": "Transavia France",
+    "color": "#07CD78",
+    "iata": "TO"
+  }
+}

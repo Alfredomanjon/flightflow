@@ -1,0 +1,78 @@
+/* ===========================================================
+   Estilos del cuadro. Cada estilo = un juego de variables.
+   --frame  marco exterior     --mat    paspartú
+   --paper  lámina interior    --ink    color de línea y texto
+   =========================================================== */
+
+html, body, #root { height: 100%; margin: 0; overflow: hidden; }
+
+.portrait {
+  --frame: #161616;
+  --mat: #fbfaf7;
+  --paper: #f6f3ec;
+  --ink: #c8372d;
+  /* Factor sobre el grosor original de cada trazo del SVG (contorno 1.1 px):
+     1/1.1 → contorno de 1 px; los detalles finos quedan proporcionales (~0.55–0.65 px). */
+  --stroke-k: 0.9091;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", system-ui, sans-serif;
+  --bevel: inset 0 0 0 1px rgba(0, 0, 0, 0.06), inset 1px 1px 0 rgba(0, 0, 0, 0.12),
+    inset -1px -1px 0 rgba(255, 255, 255, 0.9);
+  --mat-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.35);
+  --paper-pattern: none;
+  /* unidad tipográfica: escala con el lado corto de la pantalla */
+  --u: clamp(0.8px, 0.12vmin, 2.2px);
+}
+
+/* Lámina: grabado a una tinta sobre papel, estilo FlightPortrait */
+.portrait[data-style='lamina'][data-ink='red'] { --ink: #c8372d; }
+.portrait[data-style='lamina'][data-ink='blue'] { --ink: #1f4e9c; }
+.portrait[data-style='lamina'][data-ink='black'] { --ink: #1c1c1c; }
+
+/* Plano: blueprint */
+.portrait[data-style='plano'] {
+  --frame: #0b1830;
+  --mat: #e9edf3;
+  --paper: #1d3f73;
+  --ink: #eef3ff;
+  --font: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  --bevel: inset 0 0 0 1px rgba(0, 0, 0, 0.25), inset 1px 1px 0 rgba(0, 0, 0, 0.3);
+  --paper-pattern:
+    linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+}
+
+/* Noche */
+.portrait[data-style='noche'] {
+  --frame: #000000;
+  --mat: #161616;
+  --paper: #0f0f10;
+  --ink: #e8e4da;
+  --bevel: inset 0 0 0 1px rgba(255, 255, 255, 0.04), inset 1px 1px 0 rgba(0, 0, 0, 0.6),
+    inset -1px -1px 0 rgba(255, 255, 255, 0.05);
+  --mat-shadow: inset 0 2px 12px rgba(0, 0, 0, 0.8);
+}
+
+.portrait-frame { background: var(--frame); }
+.portrait-mat { background: var(--mat); box-shadow: var(--mat-shadow); }
+.portrait-paper {
+  background-color: var(--paper);
+  background-image: var(--paper-pattern);
+  background-size: 24px 24px;
+  background-position: -1px -1px;
+  box-shadow: var(--bevel);
+  color: var(--ink);
+  font-family: var(--font);
+}
+
+
+@keyframes portrait-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.portrait-enter { animation: portrait-fade 400ms ease-out both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .portrait-enter { animation: none; }
+}
+
+.cursor-hidden, .cursor-hidden * { cursor: none !important; }

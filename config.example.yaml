@@ -1,0 +1,61 @@
+# FlightFlow configuration
+# Copy this file to config.yaml and edit it. Only the `receiver` block is required;
+# everything else has sensible defaults. Restart FlightFlow after changing it
+# (docker compose restart) — the web apps pick it up without rebuilding.
+# Full reference: docs/configuration.md
+
+receiver:
+  # Base URL of your tar1090 / readsb web interface. FlightFlow reads
+  # <url>/data/aircraft.json and <url>/data/stats.json from it.
+  # Use `mock` to try FlightFlow with synthetic traffic and no antenna.
+  url: http://192.168.1.50/tar1090
+  # Where your antenna is. Used for distances and to centre the map.
+  latitude: 40.4168
+  longitude: -3.7038
+  # Other receivers (dump1090-fa, a remote feed…): point straight at the JSON files.
+  # aircraft_json_url: http://192.168.1.50:8080/data/aircraft.json
+  # stats_json_url: http://192.168.1.50:8080/data/stats.json
+  # tar1090 bundles an aircraft database (registration + type). Disable it for other receivers.
+  # aircraft_db: true
+
+location:
+  # Optional ICAO code of your local airport: shown on the map, with its METAR.
+  # Its coordinates are looked up automatically.
+  home_airport: LEMD
+  # Airports within this radius (km) of the receiver are drawn on the map.
+  nearby_radius_km: 150
+
+ui:
+  language: en          # en | es
+  units: aviation       # aviation (ft, kt, km) | metric (m, km/h, km) | imperial (ft, mph, mi)
+
+database:
+  # Default: a SQLite file in the data folder, nothing to set up.
+  # PostgreSQL (local, Aiven, Supabase, Neon, Cloud SQL, Azure…):
+  #   url: postgresql://user:password@host:5432/flightflow?sslmode=require
+  # Prefer keeping the password out of this file: set FLIGHTFLOW_DATABASE_URL instead.
+  # url: sqlite:////data/flightflow.db
+
+collector:
+  enabled: true         # store positions and build the history used by Analytics
+  interval_seconds: 5   # how often positions are stored
+  compact_at: "00:30"   # UTC time when each finished day is summarised
+
+map:
+  enabled: true
+  metar: true           # METAR of location.home_airport (from aviationweather.gov)
+  callsign_radius_km: 50  # "nearby" callsign filter radius around the home airport
+  # style_url: https://tiles.openfreemap.org/styles/positron
+
+analytics:
+  enabled: true
+
+portrait:
+  enabled: true
+  default_radius_km: 40 # planes closer than this are drawn (5–100, changeable on screen)
+  max_planes: 3         # 1–3
+
+# Airline logos are trademarks and are not included. Set to true to download them
+# once into the data folder (from images.kiwi.com) for your own use. Without them,
+# a coloured badge with the airline code is shown.
+airline_logos: false

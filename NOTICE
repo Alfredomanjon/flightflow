@@ -1,0 +1,41 @@
+FlightFlow
+Copyright (c) 2026 Alfredo Manjón Canela — MIT License (see LICENSE)
+
+Third-party data and services
+-----------------------------
+
+Airports (services/map/public/airports.json)
+  Generated from OurAirports (https://ourairports.com/data/), released into the
+  public domain by its authors.
+
+Map tiles and style
+  OpenFreeMap (https://openfreemap.org), map data © OpenStreetMap contributors,
+  available under the Open Database License (ODbL). Attribution is shown on the map.
+
+Aircraft information (runtime only, nothing is redistributed)
+  - tar1090 aircraft database, served by the user's own receiver.
+  - hexdb.io (https://hexdb.io), queried from the browser for registration/type.
+
+Weather (runtime only)
+  METAR from the Aviation Weather Center (https://aviationweather.gov), NOAA.
+
+Font
+  Inter (https://rsms.me/inter), SIL Open Font License 1.1, loaded from Google Fonts.
+
+Airline names and colours
+  packages/shared/src/data/airlines.json lists airline names, ICAO/IATA codes and a
+  representative colour, used to draw a text badge. These are factual identifiers;
+  airline names are trademarks of their respective owners.
+
+Airline logos
+  Not included. Airline logos are trademarks of their owners. If the user sets
+  `airline_logos: true`, FlightFlow downloads them at runtime from images.kiwi.com
+  into the user's own data folder for personal use. They are never committed to
+  this repository or included in the published image.
+
+Aircraft drawings (packages/shared/src/art/aircraft/*.svg)
+  Original work by the author, MIT licensed. The side profiles are generated
+  parametrically from published dimensions (length, fuselage radius, wing and
+  door positions…) plus a small number of control points measured by the author
+  on reference side views, then smoothed and drawn in FlightFlow's own style.
+  No third-party artwork is included.

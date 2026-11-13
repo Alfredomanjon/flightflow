@@ -1,0 +1,30 @@
+{
+  "name": "flightflow",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Live map, history and a to-scale portrait of the planes your ADS-B receiver hears",
+  "license": "MIT",
+  "workspaces": [
+    "packages/*",
+    "services/map",
+    "services/analytics",
+    "services/portrait"
+  ],
+  "scripts": {
+    "dev": "concurrently -k -n api,map,analytics,portrait -c blue,green,magenta,yellow \"npm:dev:collector\" \"npm:dev:map\" \"npm:dev:analytics\" \"npm:dev:portrait\"",
+    "dev:collector": "bash scripts/dev-collector.sh",
+    "dev:map": "npm run dev -w services/map",
+    "dev:analytics": "npm run dev -w services/analytics",
+    "dev:portrait": "npm run dev -w services/portrait",
+    "build": "npm run build -w services/map -w services/analytics -w services/portrait",
+    "typecheck": "npm run typecheck -w services/map -w services/analytics -w services/portrait",
+    "test:collector": "cd services/collector && .venv/bin/pytest -q",
+    "lint:collector": "cd services/collector && .venv/bin/ruff check flightflow tests"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
