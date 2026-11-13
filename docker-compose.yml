@@ -11,6 +11,12 @@ services:
     volumes:
       - ./config.yaml:/config/config.yaml:ro
       - ./data:/data
+    # Keep container logs bounded (at most 3 × 10 MB) so they never fill an SD card.
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     # Same host as the receiver: lets config.yaml use receiver.url: http://host.docker.internal/tar1090
     # extra_hosts:
     #   - "host.docker.internal:host-gateway"

@@ -67,7 +67,14 @@ class Receiver:
             return entry.data
 
     def _get_json(self, url: str) -> dict[str, Any]:
-        r = self._session.get(url, timeout=self.settings.receiver.timeout_seconds)
+        timeout = self.settings.receiver.timeout_seconds
+        try:
+            r = self._session.get(url, timeout=timeout)
+        except requests.ConnectionError:
+            # Web servers such as lighttpd close idle keep-alive connections after a few
+            # seconds; a request racing that close fails once. Retry on a fresh connection.
+            self._session.close()
+            r = self._session.get(url, timeout=timeout)
         r.raise_for_status()
         return r.json()
 
