@@ -12,6 +12,7 @@ import {
 import { CONTROLS_HIDE_MS, ONLINE_TIMEOUT_MS, placeLabel, REFRESH_MS } from './config';
 import { useActivity, useFullscreen, useMediaQuery, useWakeLock } from './hooks/useKiosk';
 import { useNearest } from './hooks/useNearest';
+import { usePhase } from './hooks/usePhase';
 import { useSettings } from './hooks/useSettings';
 
 import { Controls } from './components/Controls';
@@ -36,6 +37,7 @@ export default function App() {
   const mock = config().receiver.mock;
   const feed = useAircraft(REFRESH_MS, ONLINE_TIMEOUT_MS);
   const { planes, nearestOutside, inRange } = useNearest(feed.aircraft, settings.radiusKm, settings.maxPlanes);
+  const phases = usePhase(planes);
   const db = useAircraftDb(mock ? [] : planes.map((p) => p.ac.hex), 'ff:portrait:hexdb-v1');
   const now = useClock();
   const [dark, toggleDark] = useDarkMode('ff:dark-mode', true);
@@ -100,6 +102,8 @@ export default function App() {
                     info={db[p.ac.hex]}
                     canvas={canvas}
                     show={settings.show}
+                    phase={phases.get(p.ac.hex)}
+                    phaseDisplay={settings.phase}
                     scale={textScale}
                   />
                 </div>

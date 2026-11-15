@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { distance, distanceUnit, formatDistance, t, tn, toKm } from '@flightflow/shared';
 import { MAX_RADIUS_KM, MIN_RADIUS_KM, placeLabel } from '../config';
-import { clampRadius, type FrameStyle, type Ink, type Layout, type Settings as S } from '../hooks/useSettings';
+import { clampRadius, type FrameStyle, type Ink, type Layout, type PhaseDisplay, type Settings as S } from '../hooks/useSettings';
 import { CloseIcon } from './ui/icons';
 import { Segmented } from './ui/Segmented';
 import { StatusBadge } from './ui/StatusBadge';
@@ -179,6 +179,20 @@ export function Settings({ open, onClose, settings, set, status }: Props) {
                 })}
               </span>
             </label>
+          </Section>
+
+          <Section title={t('portrait.phase')}>
+            <Segmented<PhaseDisplay>
+              label={t('portrait.phaseAria')}
+              value={settings.phase}
+              onChange={(phase) => set({ phase })}
+              options={[
+                { value: 'icon', label: t('portrait.phase.icon') },
+                { value: 'text', label: t('portrait.phase.text') },
+                { value: 'off', label: t('portrait.phase.off') },
+              ]}
+            />
+            <span className="text-xs text-gray-400 dark:text-[#636366]">{t('portrait.phaseHint')}</span>
           </Section>
 
           <Section title={t('portrait.show')}>

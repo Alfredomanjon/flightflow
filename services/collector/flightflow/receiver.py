@@ -185,6 +185,9 @@ def mock_aircraft(lat0: float, lon0: float, now: float | None = None) -> dict[st
         d = p["dist"] + math.sin(now / 40 + i) * 1.5
         dlat = (d / 111.32) * math.cos(brg)
         dlon = (d / (111.32 * math.cos(math.radians(lat0)))) * math.sin(brg)
+        # Low planes climb/descend gently so the portrait can show its phase of flight.
+        amp = 600 if p["alt"] < 8000 else 200
+        phase = now / 30 + i
         out.append(
             {
                 "hex": p["hex"],
@@ -195,7 +198,8 @@ def mock_aircraft(lat0: float, lon0: float, now: float | None = None) -> dict[st
                 "category": p["category"],
                 "lat": lat0 + dlat,
                 "lon": lon0 + dlon,
-                "alt_baro": round(p["alt"] + math.sin(now / 30 + i) * 200),
+                "alt_baro": round(p["alt"] + math.sin(phase) * amp),
+                "baro_rate": round(math.cos(phase) * amp / 30 * 60),
                 "gs": round(p["gs"] + math.sin(now / 20 + i) * 4),
                 "track": (math.degrees(brg) + 90) % 360,
                 "squawk": f"{1000 + i * 111:04d}"[:4],
