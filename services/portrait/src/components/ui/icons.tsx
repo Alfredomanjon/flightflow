@@ -47,3 +47,13 @@ export const CloseIcon = () => (
     <path d="M18 6 6 18M6 6l12 12" />
   </svg>
 );
+
+/** Flecha sobre una línea de suelo: aterrizando (baja hacia ella) o despegando (sube desde ella). */
+export const PhaseIcon = ({ phase }: { phase: 'landing' | 'takeoff' }) => (
+  <svg {...base} strokeWidth={1.8} className="h-full w-full">
+    <path d="M5 20h14" opacity="0.55" />
+    <g className="phase-arrow">
+      {phase === 'landing' ? <path d="M12 3v11M7.5 10l4.5 4.5 4.5-4.5" /> : <path d="M12 16V5M7.5 9 12 4.5 16.5 9" />}
+    </g>
+  </svg>
+);

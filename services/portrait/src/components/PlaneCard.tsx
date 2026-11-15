@@ -8,12 +8,15 @@ import {
   getAirline,
   PlaneArt,
   speed,
+  t,
   typeName,
   type AircraftInfo,
 } from '@flightflow/shared';
 import type { NearPlane } from '../hooks/useNearest';
+import type { Phase } from '../hooks/usePhase';
 import type { Settings } from '../hooks/useSettings';
 
+import { PhaseIcon } from './ui/icons';
 import { AirlineMark } from './AirlineMark';
 
 import { useElementSize } from '../hooks/useKiosk';
@@ -23,13 +26,17 @@ interface Props {
   info?: AircraftInfo;
   canvas: { w: number; h: number };
   show: Settings['show'];
+  /** Aterrizando / despegando, si procede. */
+  phase?: Phase;
+  /** Cómo indicar la fase: icono, texto u oculto. */
+  phaseDisplay: Settings['phase'];
   /** Escala tipográfica relativa: con 1 avión el texto es más grande. */
   scale: number;
 }
 
 const nf = (v: number, digits = 0) => formatNumber(v, digits, digits);
 
-export function PlaneCard({ plane, info, canvas, show, scale }: Props) {
+export function PlaneCard({ plane, info, canvas, show, phase, phaseDisplay, scale }: Props) {
   const [cardRef, card] = useElementSize<HTMLElement>();
   const [capRef, cap] = useElementSize<HTMLDivElement>();
   const { ac, distKm } = plane;
@@ -62,6 +69,7 @@ export function PlaneCard({ plane, info, canvas, show, scale }: Props) {
   const free = card.h - cap.h - card.h * 0.06;
   const artHeight = Math.max(0, Math.min(free, (artWidth * canvas.h) / canvas.w));
 
+  const phaseLabel = phase === 'landing' ? t('portrait.landing') : t('portrait.takingOff');
   const fs = (base: number) => `calc(${base} * var(--u) * ${scale})`;
 
   return (
@@ -74,7 +82,7 @@ export function PlaneCard({ plane, info, canvas, show, scale }: Props) {
       <div className="mx-[4%] mt-[1.2vmin] h-px shrink-0 bg-current opacity-25" />
 
       <div ref={capRef} className="mx-[4%] mt-[1.6vmin] shrink-0 space-y-[0.6vmin] text-center">
-        <div className="flex items-center justify-center gap-[1.4vmin]">
+        <div className="relative flex items-center justify-center gap-[1.4vmin]">
           {show.logo && code && <AirlineMark code={code} size={fs(26)} />}
           <h2
             className="font-semibold uppercase leading-none tracking-[0.14em]"
@@ -82,6 +90,18 @@ export function PlaneCard({ plane, info, canvas, show, scale }: Props) {
           >
             {callsign}
           </h2>
+          {phase && phaseDisplay === 'icon' && (
+            <span
+              className="phase-mark absolute right-0 top-1/2 -translate-y-1/2 opacity-80"
+              data-phase={phase}
+              style={{ width: fs(22), height: fs(22) }}
+              role="img"
+              title={phaseLabel}
+              aria-label={phaseLabel}
+            >
+              <PhaseIcon phase={phase} />
+            </span>
+          )}
         </div>
         <p className="line-clamp-2 text-balance leading-tight opacity-80" style={{ fontSize: fs(15) }}>
           {[airline, model, show.reg ? reg : null].filter(Boolean).join(' · ')}
@@ -92,6 +112,14 @@ export function PlaneCard({ plane, info, canvas, show, scale }: Props) {
             style={{ fontSize: fs(12.5) }}
           >
             {stats.join('   ·   ')}
+          </p>
+        )}
+        {phase && phaseDisplay === 'text' && (
+          <p
+            className="font-medium uppercase tracking-[0.2em]"
+            style={{ fontSize: fs(12.5) }}
+          >
+            {phase === 'landing' ? '↓ ' + t('portrait.landing') : '↑ ' + t('portrait.takingOff')}
           </p>
         )}
       </div>

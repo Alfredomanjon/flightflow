@@ -13,6 +13,9 @@ export interface Aircraft {
   lon?: number;
   alt_baro?: number | 'ground';
   alt_geom?: number;
+  /** Vertical rate in ft/min (negative = descending). */
+  baro_rate?: number;
+  geom_rate?: number;
   gs?: number;
   track?: number;
   true_heading?: number;

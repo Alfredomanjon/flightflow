@@ -1,13 +1,14 @@
 import { t } from '../i18n';
 
 // ICAO type → side-profile drawing in ./aircraft.
-// There are 15 drawings; other types use the closest one.
+// There are 18 drawings; other types use the closest one.
 
 export const ART_KEYS = [
   'A319', 'A320', 'A321', 'A20N', 'A21N',
   'B738', 'B739', 'B38M', 'B39M',
   'B788', 'B789', 'A359',
   'E190', 'CRJ9', 'AT72',
+  'BJET', 'C172', 'HELI',
 ] as const;
 export type ArtKey = (typeof ART_KEYS)[number];
 
@@ -28,6 +29,9 @@ export const ART_NAMES: Record<ArtKey, string> = {
   E190: 'Embraer E190',
   CRJ9: 'Bombardier CRJ900',
   AT72: 'ATR 72',
+  BJET: 'Business jet',
+  C172: 'Cessna 172',
+  HELI: 'Light helicopter',
 };
 
 /** Names of frequent types without their own drawing. */
@@ -63,6 +67,7 @@ add('B789', [
   'B78X', 'B772', 'B773', 'B77L', 'B77W', 'B778', 'B779',
   'B742', 'B744', 'B748', 'A332', 'A333', 'A338', 'A339', 'A306', 'A310', 'A388', 'MD11',
 ]);
+add('C172', ['C150', 'C152', 'C162', 'C170', 'C175', 'C177', 'C180', 'C182', 'C185', 'C206', 'C208', 'C210', 'P28A', 'P28B', 'P28R', 'PA24', 'PA32', 'PA46', 'SR20', 'SR22', 'DA20', 'DA40', 'DA42', 'M20P', 'BE33', 'BE35', 'BE36', 'TB20', 'TB10', 'PC12', 'TBM7', 'TBM8', 'TBM9', 'RV7', 'RV8'])
 add('A359', ['A35K', 'A342', 'A343', 'A345', 'A346']);
 
 // Families for the fallback (subset of the map's aircraftIcon.ts).
@@ -86,10 +91,10 @@ export function artFor(type?: string | null, category?: string | null): ArtChoic
 
   const starts = (list: string[]) => list.some((p) => t.startsWith(p));
   if (category === 'A5') return { art: 'B789', exact: false };
-  if (category === 'A7' || (t && starts(HELI_PREFIX))) return { art: 'AT72', exact: false };
-  if (t && starts(BIZ_PREFIX)) return { art: 'CRJ9', exact: false };
-  if (t && starts(LIGHT_PREFIX)) return { art: 'AT72', exact: false };
-  if (category === 'A1') return { art: 'AT72', exact: false };
+  if (category === 'A7' || (t && starts(HELI_PREFIX))) return { art: 'HELI', exact: false };
+  if (t && starts(BIZ_PREFIX)) return { art: 'BJET', exact: false };
+  if (t && starts(LIGHT_PREFIX)) return { art: 'C172', exact: false };
+  if (category === 'A1') return { art: 'C172', exact: false };
   if (category === 'A2') return { art: 'CRJ9', exact: false };
   return { art: 'A320', exact: false };
 }

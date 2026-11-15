@@ -71,8 +71,15 @@ html, body, #root { height: 100%; margin: 0; overflow: hidden; }
 }
 .portrait-enter { animation: portrait-fade 400ms ease-out both; }
 
+/* Indicador de fase de vuelo: una flecha que se desliza despacio en su sentido. */
+@keyframes phase-down { 0%, 100% { transform: translateY(-12%); opacity: .55; } 50% { transform: translateY(12%); opacity: 1; } }
+@keyframes phase-up { 0%, 100% { transform: translateY(12%); opacity: .55; } 50% { transform: translateY(-12%); opacity: 1; } }
+.phase-mark[data-phase='landing'] .phase-arrow { animation: phase-down 2.4s ease-in-out infinite; }
+.phase-mark[data-phase='takeoff'] .phase-arrow { animation: phase-up 2.4s ease-in-out infinite; }
+
 @media (prefers-reduced-motion: reduce) {
   .portrait-enter { animation: none; }
+  .phase-mark .phase-arrow { animation: none !important; }
 }
 
 .cursor-hidden, .cursor-hidden * { cursor: none !important; }

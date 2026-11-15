@@ -9,7 +9,10 @@ side-profile prints at real scale.
 - Keeps airborne planes with a fresh position (< 30 s) within the radius of the receiver
   (`portrait.default_radius_km`, 40 km by default) and takes the closest ones.
 - **Stability:** planes on screen keep their slot. A newcomer only replaces one if it is more than 10 % closer.
-- Each type maps to one of the 15 drawings in `packages/shared/src/art/aircraft/`
+- **Landing / taking off:** below 10,000 ft with a vertical rate of at least ±500 ft/min held for 10 s,
+  a small arrow icon appears beside the callsign (↓ landing, ↑ taking off; it moves slowly, hover for the label). In Settings you can switch to a `↓ Landing` text line or hide it (`?phase=icon|text|off`). It disappears after 6 s without meeting the condition.
+  Uses the receiver's `baro_rate`; if absent it is derived from the altitude. Thresholds are in `src/config.ts`.
+- Each type maps to one of the 18 drawings in `packages/shared/src/art/aircraft/`
   (`typeMap.ts`). Types without their own drawing use the closest one; the caption shows the real type.
 - All drawings share one scale (10 px = 1 m), so an ATR 72 next to an A350 looks smaller.
 - The drawings are original work by the FlightFlow author (see NOTICE). To add a model,

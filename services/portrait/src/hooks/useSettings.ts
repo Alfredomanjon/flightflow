@@ -7,12 +7,16 @@ export type Ink = 'red' | 'blue' | 'black';
 /** row = seguidos; pyramid = con 3 aviones, 2 arriba y 1 abajo centrado. */
 export type Layout = 'row' | 'pyramid';
 
+/** Cómo se indica aterrizando/despegando: icono discreto, texto o nada. */
+export type PhaseDisplay = 'icon' | 'text' | 'off';
+
 export interface Settings {
   style: FrameStyle;
   ink: Ink;
   maxPlanes: 1 | 2 | 3;
   layout: Layout;
   radiusKm: number;
+  phase: PhaseDisplay;
   show: {
     reg: boolean;
     speed: boolean;
@@ -25,6 +29,7 @@ const KEY = 'ff:portrait-settings';
 const STYLES: FrameStyle[] = ['lamina', 'plano', 'noche'];
 const INKS: Ink[] = ['red', 'blue', 'black'];
 const LAYOUTS: Layout[] = ['row', 'pyramid'];
+const PHASES: PhaseDisplay[] = ['icon', 'text', 'off'];
 
 function prefersDark(): boolean {
   try {
@@ -41,6 +46,7 @@ function defaults(): Settings {
     maxPlanes: config().portrait.max_planes as 1 | 2 | 3,
     layout: 'row',
     radiusKm: clampRadius(config().portrait.default_radius_km),
+    phase: 'icon',
     show: { reg: true, speed: true, dist: true, logo: true },
   };
 }
@@ -59,6 +65,7 @@ function load(): Settings {
       maxPlanes: [1, 2, 3].includes(s.maxPlanes as number) ? (s.maxPlanes as 1 | 2 | 3) : base.maxPlanes,
       layout: LAYOUTS.includes(s.layout as Layout) ? (s.layout as Layout) : base.layout,
       radiusKm: typeof s.radiusKm === 'number' ? clampRadius(s.radiusKm) : base.radiusKm,
+      phase: PHASES.includes(s.phase as PhaseDisplay) ? (s.phase as PhaseDisplay) : base.phase,
       show: { ...base.show, ...(s.show ?? {}) },
     };
   } catch {
@@ -78,6 +85,8 @@ function urlOverrides(): Partial<Settings> {
   if ([1, 2, 3].includes(n)) o.maxPlanes = n as 1 | 2 | 3;
   const layout = q.get('layout') as Layout | null;
   if (layout && LAYOUTS.includes(layout)) o.layout = layout;
+  const phase = q.get('phase') as PhaseDisplay | null;
+  if (phase && PHASES.includes(phase)) o.phase = phase;
   const r = Number(q.get('radius'));
   if (r > 0) o.radiusKm = clampRadius(r);
   return o;
