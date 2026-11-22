@@ -33,20 +33,22 @@ export const LIGHT_PALETTE: Palette = {
   textHalo:      'rgba(255,255,255,0.9)',
 };
 
+// Pizarra azulada: tierra, agua, vegetación, edificios y viales se distinguen por tono
+// (no solo por brillo) sin llegar a saturar el mapa.
 export const DARK_PALETTE: Palette = {
-  land:          '#1c1c1e',
-  park:          '#1f2a22',
-  forest:        '#1b261e',
-  residential:   '#202023',
-  water:         '#0d1b2e',
-  road:          '#3a3a3c',
-  roadCasing:    '#2a2a2c',
-  motorway:      '#5a4a20',
-  motorwayCasing:'#3a3016',
-  building:      '#262629',
-  boundary:      '#58585c',
-  textPrimary:   '#8e8e93',
-  textHalo:      'rgba(0,0,0,0.85)',
+  land:          '#20242b',
+  park:          '#25402f',
+  forest:        '#1f3628',
+  residential:   '#272c35',
+  water:         '#163a5c',
+  road:          '#434b5a',
+  roadCasing:    '#1a1d23',
+  motorway:      '#a8832d',
+  motorwayCasing:'#4d3d14',
+  building:      '#2e343f',
+  boundary:      '#6b7587',
+  textPrimary:   '#c9d1dc',
+  textHalo:      'rgba(16,18,22,0.9)',
 };
 
 function set(map: MlMap, id: string, prop: string, val: unknown) {
@@ -92,7 +94,7 @@ export function applyMapPalette(map: MlMap, dark: boolean): void {
         set(map, id, 'fill-color', p.building);
         set(map, id, 'fill-opacity', 0.85);
       } else if (id.startsWith('aeroway')) {
-        set(map, id, 'fill-color', dark ? '#2a2a2c' : '#ffffff');
+        set(map, id, 'fill-color', dark ? '#323945' : '#ffffff');
       }
     }
 
@@ -108,9 +110,9 @@ export function applyMapPalette(map: MlMap, dark: boolean): void {
         set(map, id, 'line-color', p.boundary);
         set(map, id, 'line-opacity', 0.6);
       } else if (id.startsWith('railway')) {
-        set(map, id, 'line-color', dark ? '#3a3a3c' : '#d4d7dc');
+        set(map, id, 'line-color', dark ? '#4a5262' : '#d4d7dc');
       } else if (id.startsWith('aeroway')) {
-        set(map, id, 'line-color', dark ? '#3a3a3c' : '#ffffff');
+        set(map, id, 'line-color', dark ? '#3d4452' : '#ffffff');
       }
     }
 
