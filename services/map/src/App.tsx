@@ -25,7 +25,11 @@ export default function App() {
   const stats = usePolling(fetchLiveStats, STATS_REFRESH_MS);
   const metar = usePolling(fetchMetar, METAR_REFRESH_MS, METAR_ENABLED);
   const now = useClock();
-  const [selectedHex, setSelectedHex] = useState<string | null>(null);
+  const [selectedHex, setSelectedHex] = useState<string | null>(() => {
+    const h = new URLSearchParams(window.location.search).get('hex');
+    return h && /^[0-9a-f]{6}$/i.test(h) ? h.toLowerCase() : null;
+  });
+  const [following, setFollowing] = useState(false);
 
   const hexes = useMemo(() => aircraft.map((a) => a.hex), [aircraft]);
   // Demo traffic uses fictitious hex codes: don't look them up.
@@ -68,12 +72,22 @@ export default function App() {
 
   const handleSelect = useCallback((hex: string | null) => {
     setSelectedHex(hex);
+    setFollowing(false);
   }, []);
+
+  // La URL refleja el avión seleccionado (?hex=…) para poder compartirlo.
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (selectedHex) url.searchParams.set('hex', selectedHex);
+    else url.searchParams.delete('hex');
+    window.history.replaceState(null, '', url);
+  }, [selectedHex]);
 
   // Desde el buscador: selecciona y centra el mapa en el avión.
   const handlePick = useCallback(
     (hex: string) => {
       setSelectedHex(hex);
+      setFollowing(false);
       const a = enrichedWithPos.find((x) => x.hex === hex);
       if (a && map) {
         map.flyTo({ center: [a.lon!, a.lat!], zoom: Math.max(map.getZoom(), 9.5), essential: true });
@@ -86,7 +100,10 @@ export default function App() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const el = e.target as HTMLElement | null;
-      if (e.key === 'Escape' && !(el && el.tagName === 'INPUT')) setSelectedHex(null);
+      if (e.key === 'Escape' && !(el && el.tagName === 'INPUT')) {
+        setSelectedHex(null);
+        setFollowing(false);
+      }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -104,6 +121,8 @@ export default function App() {
         callsignMode={callsignMode}
         viewMode={viewMode}
         onMapReady={setMap}
+        followHex={following ? selectedHex : null}
+        onStopFollow={() => setFollowing(false)}
       />
       <Topbar
         aircraft={enrichedWithPos}
@@ -131,6 +150,8 @@ export default function App() {
         selectedAircraft={selectedAircraft}
         selectedAircraftInfo={selectedAircraftInfo}
         trailLength={trailLength}
+        following={following}
+        onToggleFollow={() => setFollowing((f) => !f)}
       />
     </div>
   );

@@ -14,6 +14,8 @@ interface Props {
   selectedAircraft: Aircraft | null;
   selectedAircraftInfo: AircraftInfo | null;
   trailLength: number;
+  following: boolean;
+  onToggleFollow: () => void;
 }
 
 type Tab = 'traffic' | 'stats';
@@ -27,6 +29,8 @@ export function SidePanel({
   selectedAircraft,
   selectedAircraftInfo,
   trailLength,
+  following,
+  onToggleFollow,
 }: Props) {
   const [tab, setTab] = useState<Tab>('traffic');
   const [collapsed, setCollapsed] = useState(true);
@@ -74,6 +78,8 @@ export function SidePanel({
               aircraft={selectedAircraft}
               info={selectedAircraftInfo}
               trailLength={trailLength}
+              following={following}
+              onToggleFollow={onToggleFollow}
               onClose={() => onSelect(null)}
             />
           </div>

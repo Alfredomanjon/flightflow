@@ -23,6 +23,10 @@ interface Props {
   callsignMode: CallsignMode;
   viewMode: ViewMode;
   onMapReady?: (map: MlMap) => void;
+  /** Hex del avión que la cámara debe seguir (null = libre). */
+  followHex?: string | null;
+  /** El usuario movió el mapa a mano: dejar de seguir. */
+  onStopFollow?: () => void;
 }
 
 // Registra los 5 sprites (uno por familia visual) con la paleta del modo.
@@ -185,6 +189,8 @@ export function Map({
   callsignMode,
   viewMode,
   onMapReady,
+  followHex = null,
+  onStopFollow,
 }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MlMap | null>(null);
@@ -193,6 +199,8 @@ export function Map({
   const onSelectRef = useRef(onSelect);
   const aircraftRef = useRef<Aircraft[]>(aircraft);
   const followedHexRef = useRef<string | null>(null);
+  const onStopFollowRef = useRef(onStopFollow);
+  onStopFollowRef.current = onStopFollow;
   const onMapReadyRef = useRef(onMapReady);
   onMapReadyRef.current = onMapReady;
   onSelectRef.current = onSelect;
@@ -374,6 +382,9 @@ export function Map({
         map.on('mouseleave', layer, () => { map.getCanvas().style.cursor = ''; });
       }
 
+      // Arrastrar el mapa a mano cancela el seguimiento (los movimientos del código no traen originalEvent).
+      map.on('dragstart', () => onStopFollowRef.current?.());
+
       readyRef.current = true;
       onMapReadyRef.current?.(map);
     });
@@ -529,6 +540,16 @@ export function Map({
       onSelectRef.current(null);
     };
   }, [viewMode]);
+
+  // Seguimiento manual (botón «Seguir»): centra la cámara en el avión en cada actualización.
+  useEffect(() => {
+    if (!followHex) return;
+    const map = mapRef.current;
+    if (!map || !readyRef.current) return;
+    const target = aircraft.find((a) => a.hex === followHex);
+    if (!target || typeof target.lat !== 'number' || typeof target.lon !== 'number') return;
+    map.easeTo({ center: [target.lon, target.lat], duration: 900, essential: true });
+  }, [aircraft, followHex]);
 
   // Persecución suave del avión en autoplay: cada vez que aircraft.json trae
   // nueva posición, deslizamos la cámara al nuevo punto sin cambiar el zoom.
