@@ -27,12 +27,14 @@ interface Props {
 // Registra los 5 sprites (uno por familia visual) con la paleta del modo.
 async function registerPlaneImages(map: MlMap, dark: boolean) {
   await Promise.all(
-    ICON_KINDS.map(async (kind) => {
-      const img = await svgToImage(planeSvgForKind(kind, dark));
-      const name = `plane-${kind}`;
-      if (map.hasImage(name)) map.removeImage(name);
-      map.addImage(name, img);
-    }),
+    ICON_KINDS.flatMap((kind) =>
+      [false, true].map(async (selected) => {
+        const img = await svgToImage(planeSvgForKind(kind, dark, selected));
+        const name = `plane-${kind}${selected ? '-sel' : ''}`;
+        if (map.hasImage(name)) map.removeImage(name);
+        map.addImage(name, img);
+      }),
+    ),
   );
   if (map.getLayer('aircraft-icons')) map.triggerRepaint();
 }
@@ -50,6 +52,7 @@ function svgToImage(svg: string, size = 64): Promise<HTMLImageElement> {
 function aircraftToGeoJSON(
   aircraft: Aircraft[],
   selectedHex: string | null,
+  callsignMode: CallsignMode,
 ): GeoJSON.FeatureCollection {
   return {
     type: 'FeatureCollection',
@@ -64,6 +67,9 @@ function aircraftToGeoJSON(
             ? 1
             : 0;
         const kind: AircraftIconKind = classifyAircraft(a.t, a.category);
+        const isSelected = a.hex === selectedHex;
+        // La etiqueta del seleccionado va en una card HTML aparte.
+        const showLabel = !isSelected && (callsignMode === 'all' || (callsignMode === 'nearby' && nearHome === 1));
         return {
           type: 'Feature',
           geometry: { type: 'Point', coordinates: [a.lon!, a.lat!] },
@@ -72,9 +78,10 @@ function aircraftToGeoJSON(
             callsign,
             meta: `${reg} · ${type}`,
             rotate: a.track ?? a.true_heading ?? a.mag_heading ?? 0,
-            selected: a.hex === selectedHex ? 1 : 0,
+            selected: isSelected ? 1 : 0,
             nearHome,
-            iconImage: `plane-${kind}`,
+            label: showLabel ? callsign : '',
+            iconImage: `plane-${kind}${isSelected ? '-sel' : ''}`,
           },
         };
       }),
@@ -106,7 +113,7 @@ function addAirportLayers(map: MlMap, dark: boolean, beforeId?: string) {
     source: 'airports',
     paint: {
       'circle-radius': ['case', ['==', ['get', 'home'], 1], 12, 9],
-      'circle-color': dark ? '#9ab8ff' : '#123b89',
+      'circle-color': dark ? '#0A84FF' : '#007AFF',
       'circle-opacity': 0.18,
       'circle-stroke-width': 0,
     },
@@ -120,11 +127,11 @@ function addAirportLayers(map: MlMap, dark: boolean, beforeId?: string) {
     paint: {
       'circle-radius': ['case', ['==', ['get', 'home'], 1], 5, 4],
       'circle-color': ['case', ['==', ['get', 'home'], 1],
-        (dark ? '#ffd166' : '#e08a00'),
-        (dark ? '#9ab8ff' : '#123b89'),
+        '#FF9F0A',
+        (dark ? '#0A84FF' : '#007AFF'),
       ],
       'circle-stroke-width': 1.5,
-      'circle-stroke-color': dark ? 'rgba(15,17,32,0.85)' : 'rgba(255,255,255,0.95)',
+      'circle-stroke-color': dark ? '#000000' : '#ffffff',
     },
   }, beforeId);
 
@@ -144,8 +151,8 @@ function addAirportLayers(map: MlMap, dark: boolean, beforeId?: string) {
       'symbol-sort-key': ['case', ['==', ['get', 'home'], 1], -1, 0],
     },
     paint: {
-      'text-color': dark ? '#cfd8e8' : '#1f2a44',
-      'text-halo-color': dark ? 'rgba(15,17,32,0.85)' : 'rgba(255,255,255,0.92)',
+      'text-color': dark ? '#d1d1d6' : '#374151',
+      'text-halo-color': dark ? 'rgba(0,0,0,0.85)' : 'rgba(255,255,255,0.92)',
       'text-halo-width': 1.4,
     },
   }, beforeId);
@@ -153,17 +160,17 @@ function addAirportLayers(map: MlMap, dark: boolean, beforeId?: string) {
 
 function updateAirportLayers(map: MlMap, dark: boolean) {
   if (!map.getLayer('airports-dot')) return;
-  map.setPaintProperty('airports-halo', 'circle-color', dark ? '#9ab8ff' : '#123b89');
+  map.setPaintProperty('airports-halo', 'circle-color', dark ? '#0A84FF' : '#007AFF');
   map.setPaintProperty('airports-dot', 'circle-color', [
     'case', ['==', ['get', 'home'], 1],
-    (dark ? '#ffd166' : '#e08a00'),
-    (dark ? '#9ab8ff' : '#123b89'),
+    '#FF9F0A',
+    (dark ? '#0A84FF' : '#007AFF'),
   ]);
   map.setPaintProperty('airports-dot', 'circle-stroke-color',
-    dark ? 'rgba(15,17,32,0.85)' : 'rgba(255,255,255,0.95)');
-  map.setPaintProperty('airports-label', 'text-color', dark ? '#cfd8e8' : '#1f2a44');
+    dark ? '#000000' : '#ffffff');
+  map.setPaintProperty('airports-label', 'text-color', dark ? '#d1d1d6' : '#374151');
   map.setPaintProperty('airports-label', 'text-halo-color',
-    dark ? 'rgba(15,17,32,0.85)' : 'rgba(255,255,255,0.92)');
+    dark ? 'rgba(0,0,0,0.85)' : 'rgba(255,255,255,0.92)');
 }
 
 // ─── Componente ───────────────────────────────────────────────────────────────
@@ -195,8 +202,12 @@ export function Map({
     applyMapPalette(map, darkMode);
     updateAirportLayers(map, darkMode);
     void registerPlaneImages(map, darkMode);
+    if (map.getLayer('aircraft-labels')) {
+      map.setPaintProperty('aircraft-labels', 'text-color', darkMode ? '#ffffff' : '#111827');
+      map.setPaintProperty('aircraft-labels', 'text-halo-color', darkMode ? 'rgba(0,0,0,0.9)' : 'rgba(255,255,255,0.95)');
+    }
     if (map.getLayer('trail-line')) {
-      const color = darkMode ? '#9ab8ff' : '#123b89';
+      const color = darkMode ? '#0A84FF' : '#007AFF';
       map.setPaintProperty('trail-line', 'line-color', color);
       map.setPaintProperty('trail-glow', 'line-color', color);
     }
@@ -242,6 +253,10 @@ export function Map({
       applyMapPalette(mapRef.current, isDark);
       updateAirportLayers(mapRef.current, isDark);
       void registerPlaneImages(mapRef.current, isDark);
+      if (mapRef.current.getLayer('aircraft-labels')) {
+        mapRef.current.setPaintProperty('aircraft-labels', 'text-color', isDark ? '#ffffff' : '#111827');
+        mapRef.current.setPaintProperty('aircraft-labels', 'text-halo-color', isDark ? 'rgba(0,0,0,0.9)' : 'rgba(255,255,255,0.95)');
+      }
     });
     observer.observe(document.documentElement, {
       attributes: true,
@@ -275,7 +290,7 @@ export function Map({
         source: 'trail',
         layout: { 'line-cap': 'round', 'line-join': 'round' },
         paint: {
-          'line-color': isDark ? '#9ab8ff' : '#123b89',
+          'line-color': isDark ? '#0A84FF' : '#007AFF',
           'line-width': 7,
           'line-opacity': 0.18,
           'line-blur': 2,
@@ -287,7 +302,7 @@ export function Map({
         source: 'trail',
         layout: { 'line-cap': 'round', 'line-join': 'round' },
         paint: {
-          'line-color': isDark ? '#9ab8ff' : '#123b89',
+          'line-color': isDark ? '#0A84FF' : '#007AFF',
           'line-width': 2.5,
           'line-opacity': 0.9,
         },
@@ -311,6 +326,28 @@ export function Map({
           'icon-rotation-alignment': 'map',
           'icon-allow-overlap': true,
           'icon-ignore-placement': true,
+        },
+      });
+
+      // Callsign pegado al icono (texto con halo; sin tarjeta, como en un radar)
+      map.addLayer({
+        id: 'aircraft-labels',
+        type: 'symbol',
+        source: 'aircraft',
+        minzoom: 6,
+        layout: {
+          'text-field': ['get', 'label'],
+          'text-font': ['Noto Sans Bold'],
+          'text-size': 11,
+          'text-anchor': 'left',
+          'text-offset': [1.3, 0],
+          'text-optional': true,
+          'text-allow-overlap': false,
+        },
+        paint: {
+          'text-color': isDark ? '#ffffff' : '#111827',
+          'text-halo-color': isDark ? 'rgba(0,0,0,0.9)' : 'rgba(255,255,255,0.95)',
+          'text-halo-width': 1.6,
         },
       });
 
@@ -349,83 +386,52 @@ export function Map({
     const map = mapRef.current;
     if (!map || !readyRef.current) return;
     const src = map.getSource('aircraft') as GeoJSONSource | undefined;
-    if (src) src.setData(aircraftToGeoJSON(aircraft, selectedHex));
-  }, [aircraft, selectedHex]);
+    if (src) src.setData(aircraftToGeoJSON(aircraft, selectedHex, callsignMode));
+  }, [aircraft, selectedHex, callsignMode]);
 
-  // ── Markers HTML para los callsigns (Liquid Glass real con backdrop-filter)
-  // Usamos globalThis.Map para evitar colisión con el nombre de la función `Map`.
-  const markersRef = useRef<globalThis.Map<string, maplibregl.Marker>>(new globalThis.Map());
+  // ── Card HTML solo para el avión seleccionado (el resto lleva etiqueta GL).
+  const markerRef = useRef<maplibregl.Marker | null>(null);
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !readyRef.current) return;
 
-    const seen = new Set<string>();
-    for (const a of aircraft) {
-      if (typeof a.lat !== 'number' || typeof a.lon !== 'number') continue;
-      seen.add(a.hex);
-
-      const nearHome =
-        distanceKm(HOME_AIRPORT.lat, HOME_AIRPORT.lon, a.lat, a.lon) < CALLSIGN_RADIUS_KM;
-      const isSelected = a.hex === selectedHex;
-      const shouldShow =
-        isSelected ||
-        callsignMode === 'all' ||
-        (callsignMode === 'nearby' && nearHome);
-
-      const callsign = cleanCallsign(a.flight) || a.hex.toUpperCase();
-      const reg = a.r ?? '—';
-      const type = a.t ?? a.category ?? '—';
-      const meta = `${reg} · ${type}`;
-
-      let marker = markersRef.current.get(a.hex);
-      if (!marker) {
-        const el = document.createElement('div');
-        el.className = 'aircraft-card-html glass';
-        el.innerHTML = `
-          <div class="aircraft-card-html__callsign"></div>
-          <div class="aircraft-card-html__meta"></div>
-        `;
-        const hex = a.hex;
-        el.addEventListener('click', (ev) => {
-          ev.stopPropagation();
-          onSelectRef.current(hex);
-        });
-        marker = new maplibregl.Marker({
-          element: el,
-          anchor: 'left',
-          offset: [22, 0],
-        })
-          .setLngLat([a.lon, a.lat])
-          .addTo(map);
-        markersRef.current.set(a.hex, marker);
-      } else {
-        marker.setLngLat([a.lon, a.lat]);
-      }
-
-      const el = marker.getElement();
-      const cs = el.querySelector('.aircraft-card-html__callsign');
-      const mt = el.querySelector('.aircraft-card-html__meta');
-      if (cs && cs.textContent !== callsign) cs.textContent = callsign;
-      if (mt && mt.textContent !== meta) mt.textContent = meta;
-      el.classList.toggle('aircraft-card-html--selected', isSelected);
-      el.style.display = shouldShow ? '' : 'none';
-      el.style.zIndex = isSelected ? '2' : '1';
+    const a = selectedHex ? aircraft.find((x) => x.hex === selectedHex) : undefined;
+    if (!a || typeof a.lat !== 'number' || typeof a.lon !== 'number') {
+      markerRef.current?.remove();
+      markerRef.current = null;
+      return;
     }
 
-    // Eliminar markers de aviones que han desaparecido
-    for (const [hex, marker] of markersRef.current) {
-      if (!seen.has(hex)) {
-        marker.remove();
-        markersRef.current.delete(hex);
-      }
+    let marker = markerRef.current;
+    if (!marker) {
+      const el = document.createElement('div');
+      el.className = 'aircraft-card-html aircraft-card-html--selected';
+      el.innerHTML = `
+        <div class="aircraft-card-html__callsign"></div>
+        <div class="aircraft-card-html__meta"></div>
+      `;
+      marker = new maplibregl.Marker({ element: el, anchor: 'left', offset: [24, 0] })
+        .setLngLat([a.lon, a.lat])
+        .addTo(map);
+      markerRef.current = marker;
+    } else {
+      marker.setLngLat([a.lon, a.lat]);
     }
-  }, [aircraft, selectedHex, callsignMode]);
+
+    const el = marker.getElement();
+    const callsign = cleanCallsign(a.flight) || a.hex.toUpperCase();
+    const meta = `${a.r ?? '—'} · ${a.t ?? a.category ?? '—'}`;
+    const cs = el.querySelector('.aircraft-card-html__callsign');
+    const mt = el.querySelector('.aircraft-card-html__meta');
+    if (cs && cs.textContent !== callsign) cs.textContent = callsign;
+    if (mt && mt.textContent !== meta) mt.textContent = meta;
+  }, [aircraft, selectedHex]);
 
   // Cleanup global al desmontar
   useEffect(() => {
     return () => {
-      for (const marker of markersRef.current.values()) marker.remove();
-      markersRef.current.clear();
+      markerRef.current?.remove();
+      markerRef.current = null;
     };
   }, []);
 

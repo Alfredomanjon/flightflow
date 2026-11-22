@@ -119,18 +119,17 @@ interface SvgColors {
   halo: string;
 }
 
+// Azul primario del sistema; ámbar para el avión seleccionado.
+let selectedMode = false;
+
 function paletteFor(dark: boolean): SvgColors {
+  const fill = selectedMode ? '#FF9F0A' : dark ? '#0A84FF' : '#007AFF';
   return {
-    fill: dark ? '#ffffff' : '#123b89',
-    stroke: dark ? '#0b1226' : '#ffffff',
-    sw: dark ? 1.6 : 1.4,
-    halo: dark
-      ? `<defs><radialGradient id="h" cx="0" cy="0" r="22" gradientUnits="userSpaceOnUse">
-           <stop offset="0%" stop-color="#9ab8ff" stop-opacity="0.45"/>
-           <stop offset="60%" stop-color="#9ab8ff" stop-opacity="0.10"/>
-           <stop offset="100%" stop-color="#9ab8ff" stop-opacity="0"/>
-         </radialGradient></defs>
-         <circle cx="0" cy="0" r="22" fill="url(#h)" />`
+    fill,
+    stroke: dark ? '#000000' : '#ffffff',
+    sw: 1.4,
+    halo: selectedMode
+      ? '<circle cx="0" cy="0" r="27" fill="none" stroke="#FF9F0A" stroke-width="2" opacity="0.45"/>'
       : '',
   };
 }
@@ -199,7 +198,16 @@ function planeHeli(dark: boolean): string {
   );
 }
 
-export function planeSvgForKind(kind: AircraftIconKind, dark: boolean): string {
+export function planeSvgForKind(kind: AircraftIconKind, dark: boolean, selected = false): string {
+  selectedMode = selected;
+  try {
+    return planeSvgByKind(kind, dark);
+  } finally {
+    selectedMode = false;
+  }
+}
+
+function planeSvgByKind(kind: AircraftIconKind, dark: boolean): string {
   switch (kind) {
     case 'heavy': return planeHeavy(dark);
     case 'narrow': return planeNarrow(dark);

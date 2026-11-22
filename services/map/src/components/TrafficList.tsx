@@ -31,7 +31,7 @@ export function TrafficList({ aircraft, selectedHex, onSelect }: Props) {
               selected ? 'glass-item--selected' : ''
             }`}
           >
-            <span className="text-[17px] font-bold text-ink-accent dark:text-[#9ab8ff]">{callsign}</span>
+            <span className="text-[17px] font-bold text-ink-accent dark:text-[#0A84FF]">{callsign}</span>
             <span className="ml-auto flex items-center gap-[10px] text-[12px] text-black dark:text-slate-400">
               <span>{reg || '—'}</span>
               <span className="inline-block h-[3px] w-[3px] rounded-full bg-black/60" />

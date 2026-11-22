@@ -4,21 +4,48 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===========================================================
+   Tokens — alineados con services/analytics
+   =========================================================== */
+:root {
+  --primary: 0 122 255; /* #007AFF */
+  --accent: 255 159 10; /* #FF9F0A */
+  --surface: #ffffff;
+  --surface-2: #f2f2f7;
+  --border: rgba(0, 0, 0, 0.07);
+  --text: #111827;
+  --text-muted: #6b7280;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.07), 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+html.dark {
+  --primary: 10 132 255; /* #0A84FF */
+  --surface: #1c1c1e;
+  --surface-2: #2c2c2e;
+  --border: rgba(255, 255, 255, 0.07);
+  --text: #ffffff;
+  --text-muted: #8e8e93;
+  --shadow: none;
+}
+
 html,
 body,
 #root {
   height: 100%;
   margin: 0;
-  background: #a9e18b;
-  font-family: 'Inter', system-ui, sans-serif;
-  color: #222443;
+  background: #f2f2f7;
+  color: var(--text);
   overflow: hidden;
 }
 
 html.dark body,
 html.dark #root {
-  background: #0f1120;
-  color: #e2e8f0;
+  background: #000000;
+}
+
+::selection {
+  background-color: rgb(0 122 255 / 0.2);
+  color: inherit;
 }
 
 .maplibregl-ctrl-attrib,
@@ -29,93 +56,52 @@ html.dark #root {
 /* Colores del mapa gestionados directamente por applyMapPalette() */
 
 /* ===========================================================
-   Liquid Glass — superficies translúcidas reactivas al fondo
+   Superficies sólidas (sustituyen a Liquid Glass).
+   Los nombres .glass* se conservan de forma transitoria hasta
+   migrar cada componente (fases 4–6); ya no hay blur ni gradientes.
    =========================================================== */
 .glass {
-  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.38));
-  background-color: rgba(255, 255, 255, 0.18);
-  border: 1px solid rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  box-shadow:
-    0 10px 30px -12px rgba(34, 36, 67, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
 }
 
-html.dark .glass {
-  background-image: linear-gradient(180deg, rgba(40, 46, 72, 0.55), rgba(18, 22, 40, 0.40));
-  background-color: rgba(18, 22, 40, 0.20);
-  border-color: rgba(255, 255, 255, 0.10);
-  box-shadow:
-    0 10px 34px -10px rgba(0, 0, 0, 0.60),
-    inset 0 1px 0 rgba(255, 255, 255, 0.10),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.03);
-}
-
-/* Variante segmentada (toolbar/tab pill) — luz interior suave */
+/* Control segmentado / bloque secundario */
 .glass-inset {
-  background: rgba(255, 255, 255, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: inset 0 1px 2px rgba(34, 36, 67, 0.08);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
 }
 
-html.dark .glass-inset {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.06);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
-}
-
-/* Pastilla seleccionada dentro de un segmented control */
+/* Pastilla activa dentro de un segmented control */
 .glass-pill-active {
-  background-image: linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.92));
-  box-shadow:
-    0 4px 12px -4px rgba(34, 36, 67, 0.20),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  background: var(--surface);
+  box-shadow: var(--shadow);
 }
 
 html.dark .glass-pill-active {
-  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.20), rgba(255, 255, 255, 0.10));
-  box-shadow:
-    0 4px 14px -4px rgba(0, 0, 0, 0.45),
-    inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  background: #3a3a3c;
 }
 
-/* Ítem de lista glass — botones translúcidos sutiles */
+/* Ítem de lista */
 .glass-item {
-  background: rgba(255, 255, 255, 0.40);
-  border: 1px solid rgba(255, 255, 255, 0.65);
-  transition: background 140ms ease, border-color 140ms ease, transform 140ms ease;
+  background: transparent;
+  border: 1px solid transparent;
+  transition: background 140ms ease, border-color 140ms ease;
 }
 
 .glass-item:hover {
-  background: rgba(255, 255, 255, 0.62);
-}
-
-.glass-item--selected {
-  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.78));
-  border-color: rgba(18, 59, 137, 0.45);
-  box-shadow: 0 4px 12px -4px rgba(18, 59, 137, 0.25);
-}
-
-html.dark .glass-item {
-  background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(255, 255, 255, 0.06);
+  background: rgb(0 0 0 / 0.04);
 }
 
 html.dark .glass-item:hover {
-  background: rgba(255, 255, 255, 0.09);
+  background: rgb(255 255 255 / 0.06);
 }
 
+.glass-item--selected,
 html.dark .glass-item--selected {
-  background-image: linear-gradient(180deg, rgba(107, 158, 255, 0.18), rgba(107, 158, 255, 0.08));
-  border-color: rgba(122, 165, 255, 0.45);
-  box-shadow:
-    0 4px 14px -4px rgba(107, 158, 255, 0.30),
-    inset 0 1px 0 rgba(255, 255, 255, 0.10);
+  background: rgb(var(--primary) / 0.1);
+  border-color: rgb(var(--primary) / 0.35);
 }
-
-/* (Aircraft cards ahora son HTML markers — ver .aircraft-card-html arriba) */
 
 /* ===========================================================
    AirportCard wrapper — respeta el notch en móvil
@@ -126,7 +112,7 @@ html.dark .glass-item--selected {
 
 @media (min-width: 640px) {
   .airport-card-wrapper {
-    top: 30px;
+    top: 20px;
   }
 }
 
@@ -138,26 +124,24 @@ html.dark .glass-item--selected {
   z-index: 10;
   left: 12px;
   right: 12px;
-  /* Respeta el home indicator de iOS y la URL bar de Safari */
   bottom: max(12px, env(safe-area-inset-bottom));
   top: auto;
   transition: transform 300ms ease-in-out;
 }
 
 .sidepanel-container[data-collapsed='true'] {
-  /* Se va abajo lo suficiente para que la pestañita quede dentro de la zona segura */
   transform: translateY(calc(100% + max(12px, env(safe-area-inset-bottom))));
 }
 
 @media (min-width: 640px) {
   .sidepanel-container {
     left: auto;
-    right: 30px;
+    right: 20px;
     bottom: auto;
-    top: 30px;
+    top: 20px;
   }
   .sidepanel-container[data-collapsed='true'] {
-    transform: translateX(calc(100% + 30px));
+    transform: translateX(calc(100% + 20px));
   }
 }
 
@@ -168,8 +152,8 @@ html.dark .glass-item--selected {
 
 @media (min-width: 640px) {
   .sidepanel {
-    width: 391px;
-    height: calc(100vh - 60px);
+    width: 372px;
+    height: calc(100vh - 40px);
     max-height: 651px;
   }
 }
@@ -181,7 +165,7 @@ html.dark .glass-item--selected {
   transform: translateX(-50%);
   width: 92px;
   height: 40px;
-  border-radius: 20px;
+  border-radius: 12px;
 }
 
 @media (min-width: 640px) {
@@ -191,35 +175,26 @@ html.dark .glass-item--selected {
     transform: none;
     width: 38px;
     height: 42px;
-    border-radius: 12px;
   }
 }
 
 .sidepanel-toggle svg {
   width: 26px;
   height: 26px;
+  transition: transform 300ms ease-in-out;
+  transform: rotate(90deg);
 }
 
 @media (min-width: 640px) {
   .sidepanel-toggle svg {
     width: 20px;
     height: 20px;
-  }
-}
-
-.sidepanel-toggle svg {
-  transition: transform 300ms ease-in-out;
-  transform: rotate(90deg); /* móvil: chevron-down (panel abajo = ocultar) */
-}
-
-@media (min-width: 640px) {
-  .sidepanel-toggle svg {
     transform: rotate(0deg);
   }
 }
 
 .sidepanel-container[data-collapsed='true'] .sidepanel-toggle svg {
-  transform: rotate(-90deg); /* móvil colapsado: chevron-up (subir panel) */
+  transform: rotate(-90deg);
 }
 
 @media (min-width: 640px) {
@@ -228,9 +203,15 @@ html.dark .glass-item--selected {
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .sidepanel-container,
+  .sidepanel-toggle svg {
+    transition: none;
+  }
+}
+
 /* ===========================================================
-   Aircraft cards (HTML markers) — heredan .glass para tener
-   backdrop-filter real y verse igual que el resto de superficies.
+   Aircraft cards (HTML markers) — etiqueta sólida, sin backdrop-filter
    =========================================================== */
 .aircraft-card-html {
   pointer-events: auto;
@@ -238,73 +219,46 @@ html.dark .glass-item--selected {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: 7px 12px;
-  border-radius: 16px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
   white-space: nowrap;
-  font-family: 'Inter', system-ui, sans-serif;
-  /* IMPORTANTE: NO transicionar transform — MapLibre actualiza el translate
-     en cada frame del pan/zoom, y un transition lo interpolaría con delay.
-     Solo animamos box-shadow (afectado por estado :hover y --selected). */
-  transition: box-shadow 140ms ease;
+  /* No transicionar transform: MapLibre lo actualiza en cada frame. */
+  transition: box-shadow 140ms ease, border-color 140ms ease;
   user-select: none;
-  /* Promoción a su propia capa GPU — reposicionamiento sin recalcular layout. */
   will-change: transform;
   contain: layout style paint;
 }
 
-/* (Antes había un override de estilos mientras el mapa se movía — eliminado
-    porque causaba un cambio sutil de color visible al hacer tap, ya que ningún
-    gradiente plano replica al 100% el saturate del backdrop-filter.) */
-
-/* Hover solo en dispositivos con ratón real — en touch el :hover se queda
-   pegado tras un tap (toda la pantalla se "iluminaría"). */
 @media (hover: hover) {
   .aircraft-card-html:hover {
-    filter: brightness(1.08);
+    border-color: rgb(var(--primary) / 0.5);
   }
 }
 
 .aircraft-card-html__callsign {
-  font-size: 15px;
-  font-weight: 700;
-  color: #123b89;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
   line-height: 1;
-  letter-spacing: -0.01em;
 }
 
 .aircraft-card-html__meta {
   margin-top: 2px;
   font-size: 11px;
   font-weight: 500;
-  color: rgba(31, 42, 68, 0.78);
+  color: var(--text-muted);
   line-height: 1;
 }
 
-html.dark .aircraft-card-html__callsign {
-  color: #9ab8ff;
-}
-
-html.dark .aircraft-card-html__meta {
-  color: rgba(207, 216, 232, 0.85);
-}
-
-/* Estado seleccionado — sobreescribe el fondo de .glass */
-.aircraft-card-html--selected {
-  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.78));
-  background-color: rgba(255, 255, 255, 0.30);
-  border-color: rgba(18, 59, 137, 0.5);
-  box-shadow:
-    0 8px 24px -6px rgba(18, 59, 137, 0.30),
-    inset 0 1px 0 rgba(255, 255, 255, 0.75);
-}
-
+.aircraft-card-html--selected,
 html.dark .aircraft-card-html--selected {
-  background-image: linear-gradient(180deg, rgba(107, 158, 255, 0.32), rgba(40, 70, 140, 0.42));
-  background-color: rgba(40, 60, 110, 0.25);
-  border-color: rgba(122, 165, 255, 0.55);
-  box-shadow:
-    0 8px 26px -6px rgba(107, 158, 255, 0.40),
-    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  background: rgb(var(--primary) / 0.12);
+  border-color: rgb(var(--primary));
 }
 
-/* (clases dark .aircraft-card antiguas eliminadas — sustituidas por .aircraft-card-html) */
+.aircraft-card-html--selected .aircraft-card-html__callsign {
+  color: rgb(var(--primary));
+}

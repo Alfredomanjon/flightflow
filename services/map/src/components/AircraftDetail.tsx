@@ -75,7 +75,7 @@ export function AircraftDetail({ aircraft, info, trailLength, onClose }: Props) 
           </svg>
         </button>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[24px] font-bold leading-tight text-ink-accent dark:text-[#9ab8ff]">
+          <p className="truncate text-[24px] font-bold leading-tight text-ink-accent dark:text-[#0A84FF]">
             {callsign}
           </p>
           <p className="truncate text-[13px] font-medium text-ink-muted dark:text-slate-400">
