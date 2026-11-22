@@ -135,7 +135,8 @@ html.dark .glass-item--selected {
 
 .sidepanel {
   width: 100%;
-  height: min(70vh, 540px);
+  /* Debe quedar por debajo de la barra de controles (zoom/capas, a la derecha). */
+  height: min(52dvh, 440px);
 }
 
 @media (min-width: 640px) {
@@ -242,9 +243,11 @@ html.dark .glass-item--selected {
   line-height: 1;
 }
 
+/* Base sólida + velo azul: sin transparencia real, el mapa no se ve a través. */
 .aircraft-card-html--selected,
 html.dark .aircraft-card-html--selected {
-  background: rgb(var(--primary) / 0.12);
+  background-color: var(--surface);
+  background-image: linear-gradient(rgb(var(--primary) / 0.12), rgb(var(--primary) / 0.12));
   border-color: rgb(var(--primary));
 }
 

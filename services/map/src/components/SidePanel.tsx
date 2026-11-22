@@ -45,7 +45,7 @@ export function SidePanel({
   onCenterAirport,
 }: Props) {
   const [tab, setTab] = useState<Tab>('traffic');
-  const [collapsed, setCollapsed] = useState(true);
+  const [collapsed, setCollapsed] = useState(selectedHex == null);
 
   // Auto-expandir cuando el usuario selecciona un avión (de null a algo)
   const prevHexRef = useRef<string | null>(selectedHex);
