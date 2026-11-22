@@ -128,9 +128,9 @@ export function AircraftDetail({ aircraft, info, trailLength, following, onToggl
 
       {/* Silueta del aparato */}
       <div
-        className="flex h-24 items-center justify-center rounded-xl bg-black/[0.04] px-4 text-[#007AFF] dark:bg-white/[0.06] dark:text-[#0A84FF]"
+        className="flex h-32 items-center justify-center rounded-xl bg-black/[0.04] px-3 text-[#007AFF] dark:bg-white/[0.06] dark:text-[#0A84FF]"
       >
-        <AircraftArt type={aircraft.t || info?.icaoType} category={aircraft.category} className="h-14 w-auto" title={type} />
+        <AircraftArt type={aircraft.t || info?.icaoType} category={aircraft.category} className="h-auto max-h-28 w-full" title={type} />
       </div>
 
       {/* Métricas clave */}
