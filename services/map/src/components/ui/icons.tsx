@@ -125,3 +125,6 @@ export const ArrowUpIcon = (p: IconProps) => (
 export const ArrowDownIcon = (p: IconProps) => (
   <Icon {...p}><path d="M12 5v14M19 12l-7 7-7-7" /></Icon>
 );
+export const SidebarIcon = (p: IconProps) => (
+  <Icon {...p}><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M9 3v18" /></Icon>
+);

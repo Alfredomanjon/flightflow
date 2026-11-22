@@ -12,7 +12,7 @@ import {
   type Metar,
 } from '@flightflow/shared';
 import type { Airport } from '../data/airports';
-import { ChevronLeftIcon, LocateIcon, PlaneIcon } from './ui/icons';
+import { CloseIcon, LocateIcon, PlaneIcon } from './ui/icons';
 
 interface Props {
   airport: Airport;
@@ -51,15 +51,6 @@ export function AirportPanel({ airport, isHome, metar, aircraft, onClose, onCent
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-start gap-2">
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label={t('map.detail.back')}
-          title={t('map.detail.back')}
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-black/5 hover:text-gray-900 dark:text-[#8E8E93] dark:hover:bg-white/8 dark:hover:text-white"
-        >
-          <ChevronLeftIcon className="h-5 w-5" />
-        </button>
         <div className="min-w-0 flex-1">
           <p className="truncate text-2xl font-semibold leading-tight text-gray-900 dark:text-white">{airport.icao}</p>
           <p className="truncate text-xs text-gray-500 dark:text-[#8E8E93]">
@@ -74,6 +65,15 @@ export function AirportPanel({ airport, isHome, metar, aircraft, onClose, onCent
         >
           <LocateIcon className="h-3.5 w-3.5" />
           {t('map.airport.center')}
+        </button>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label={t('map.detail.close')}
+          title={t('map.detail.close')}
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-black/5 hover:text-gray-900 dark:text-[#8E8E93] dark:hover:bg-white/8 dark:hover:text-white"
+        >
+          <CloseIcon className="h-4 w-4" />
         </button>
       </div>
 

@@ -17,7 +17,7 @@ import {
 import { HOME_AIRPORT } from '../config';
 import { AirlineMark } from './AirlineMark';
 import { Accordion } from './ui/Accordion';
-import { ChevronLeftIcon, CloseIcon, FollowIcon, LinkIcon } from './ui/icons';
+import { CloseIcon, FollowIcon, LinkIcon } from './ui/icons';
 
 interface Props {
   aircraft: Aircraft;
@@ -79,15 +79,6 @@ export function AircraftDetail({ aircraft, info, trailLength, following, onToggl
     <div className="flex flex-col gap-3">
       {/* Cabecera */}
       <div className="flex items-start gap-2">
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label={t('map.detail.back')}
-          title={t('map.detail.back')}
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-black/5 hover:text-gray-900 dark:text-[#8E8E93] dark:hover:bg-white/8 dark:hover:text-white"
-        >
-          <ChevronLeftIcon className="h-5 w-5" />
-        </button>
         <div className="flex min-w-0 flex-1 items-center gap-3">
           {code && <AirlineMark code={code} size="40px" />}
           <div className="min-w-0">
@@ -102,7 +93,7 @@ export function AircraftDetail({ aircraft, info, trailLength, following, onToggl
           type="button"
           onClick={onClose}
           aria-label={t('map.detail.close')}
-          title={t('map.detail.close')}
+          title={`${t('map.detail.close')} (Esc)`}
           className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-black/5 hover:text-gray-900 dark:text-[#8E8E93] dark:hover:bg-white/8 dark:hover:text-white"
         >
           <CloseIcon className="h-4 w-4" />

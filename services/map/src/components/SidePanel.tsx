@@ -6,6 +6,7 @@ import { AircraftDetail } from './AircraftDetail';
 import { AirportPanel } from './AirportPanel';
 import type { Airport } from '../data/airports';
 import { Segmented } from './ui/Segmented';
+import { ChevronDownIcon, SidebarIcon } from './ui/icons';
 
 interface Props {
   aircraft: Aircraft[];
@@ -77,17 +78,8 @@ export function SidePanel({
         aria-expanded={!collapsed}
         className="sidepanel-toggle glass flex items-center justify-center text-gray-500 transition-colors hover:text-gray-900 dark:text-[#8E8E93] dark:hover:text-white"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <polyline points="9 18 15 12 9 6" />
-        </svg>
+        <ChevronDownIcon className="toggle-chevron sm:hidden" />
+        <SidebarIcon className="toggle-panel hidden sm:block" />
       </button>
 
       {/* Panel principal */}
