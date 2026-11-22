@@ -104,19 +104,6 @@ html.dark .glass-item--selected {
 }
 
 /* ===========================================================
-   AirportCard wrapper — respeta el notch en móvil
-   =========================================================== */
-.airport-card-wrapper {
-  top: max(12px, env(safe-area-inset-top));
-}
-
-@media (min-width: 640px) {
-  .airport-card-wrapper {
-    top: 20px;
-  }
-}
-
-/* ===========================================================
    SidePanel responsive — bottom-sheet en móvil, panel lateral en desktop
    =========================================================== */
 .sidepanel-container {
@@ -133,15 +120,16 @@ html.dark .glass-item--selected {
   transform: translateY(calc(100% + max(12px, env(safe-area-inset-bottom))));
 }
 
+/* Móvil: bottom sheet bajo la barra de controles. Desktop: panel izquierdo. */
 @media (min-width: 640px) {
   .sidepanel-container {
-    left: auto;
-    right: 20px;
+    left: 16px;
+    right: auto;
     bottom: auto;
-    top: 20px;
+    top: calc(56px + 16px + env(safe-area-inset-top));
   }
   .sidepanel-container[data-collapsed='true'] {
-    transform: translateX(calc(100% + 20px));
+    transform: translateX(calc(-100% - 16px));
   }
 }
 
@@ -152,9 +140,9 @@ html.dark .glass-item--selected {
 
 @media (min-width: 640px) {
   .sidepanel {
-    width: 372px;
-    height: calc(100vh - 40px);
-    max-height: 651px;
+    width: 380px;
+    height: calc(100vh - 56px - 32px - env(safe-area-inset-top));
+    max-height: 720px;
   }
 }
 
@@ -171,7 +159,8 @@ html.dark .glass-item--selected {
 @media (min-width: 640px) {
   .sidepanel-toggle {
     top: 14px;
-    left: -46px;
+    left: auto;
+    right: -46px;
     transform: none;
     width: 38px;
     height: 42px;
@@ -189,7 +178,7 @@ html.dark .glass-item--selected {
   .sidepanel-toggle svg {
     width: 20px;
     height: 20px;
-    transform: rotate(0deg);
+    transform: rotate(180deg); /* expandido: apunta a la izquierda (ocultar) */
   }
 }
 
@@ -199,7 +188,7 @@ html.dark .glass-item--selected {
 
 @media (min-width: 640px) {
   .sidepanel-container[data-collapsed='true'] .sidepanel-toggle svg {
-    transform: rotate(180deg);
+    transform: rotate(0deg);
   }
 }
 
@@ -261,4 +250,30 @@ html.dark .aircraft-card-html--selected {
 
 .aircraft-card-html--selected .aircraft-card-html__callsign {
   color: rgb(var(--primary));
+}
+
+/* ===========================================================
+   Utilidades compartidas con analytics (barra superior, inputs, etiquetas)
+   =========================================================== */
+@layer components {
+  .glass-strong {
+    background: rgba(242, 242, 247, 0.88);
+    backdrop-filter: blur(20px) saturate(1.8);
+    -webkit-backdrop-filter: blur(20px) saturate(1.8);
+  }
+  html.dark .glass-strong {
+    background: rgba(28, 28, 30, 0.9);
+  }
+
+  .label-caps {
+    @apply text-[11px] font-semibold uppercase tracking-[0.07em] text-gray-500 dark:text-[#8E8E93];
+  }
+
+  .input {
+    @apply rounded-xl border border-black/10 bg-black/5 px-3 py-1.5 text-sm text-gray-900
+           placeholder-gray-400 transition-colors focus:border-[#007AFF]/50 focus:outline-none;
+  }
+  html.dark .input {
+    @apply border-white/10 bg-white/[0.07] text-white placeholder-gray-600 focus:border-[#0A84FF]/50;
+  }
 }

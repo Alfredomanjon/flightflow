@@ -22,6 +22,7 @@ interface Props {
   trailVersion: number;
   callsignMode: CallsignMode;
   viewMode: ViewMode;
+  onMapReady?: (map: MlMap) => void;
 }
 
 // Registra los 5 sprites (uno por familia visual) con la paleta del modo.
@@ -183,6 +184,7 @@ export function Map({
   trailVersion,
   callsignMode,
   viewMode,
+  onMapReady,
 }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MlMap | null>(null);
@@ -191,6 +193,8 @@ export function Map({
   const onSelectRef = useRef(onSelect);
   const aircraftRef = useRef<Aircraft[]>(aircraft);
   const followedHexRef = useRef<string | null>(null);
+  const onMapReadyRef = useRef(onMapReady);
+  onMapReadyRef.current = onMapReady;
   onSelectRef.current = onSelect;
   darkModeRef.current = darkMode;
   aircraftRef.current = aircraft;
@@ -371,6 +375,7 @@ export function Map({
       }
 
       readyRef.current = true;
+      onMapReadyRef.current?.(map);
     });
 
     return () => {

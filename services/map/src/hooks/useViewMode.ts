@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export type ViewMode = 'physical' | 'autoplay';
 
@@ -10,16 +10,12 @@ function readStored(): ViewMode {
   return v === 'autoplay' ? 'autoplay' : 'physical';
 }
 
-export function useViewMode(): [ViewMode, () => void] {
+export function useViewMode(): [ViewMode, (m: ViewMode) => void] {
   const [mode, setMode] = useState<ViewMode>(readStored);
 
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, mode);
   }, [mode]);
 
-  const toggle = useCallback(() => {
-    setMode((m) => (m === 'physical' ? 'autoplay' : 'physical'));
-  }, []);
-
-  return [mode, toggle];
+  return [mode, setMode];
 }

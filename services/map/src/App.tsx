@@ -1,4 +1,5 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { Map as MlMap } from 'maplibre-gl';
 import {
   config,
   fetchLiveStats,
@@ -15,7 +16,8 @@ import { useAircraftTrails } from './hooks/useAircraftTrails';
 import { useCallsignMode } from './hooks/useCallsignMode';
 import { useViewMode } from './hooks/useViewMode';
 import { Map } from './components/Map';
-import { AirportCard } from './components/AirportCard';
+import { Topbar } from './components/Topbar';
+import { MapControls } from './components/MapControls';
 import { SidePanel } from './components/SidePanel';
 
 export default function App() {
@@ -51,8 +53,9 @@ export default function App() {
   const [darkMode, toggleDark] = useDarkMode('ff:map:dark');
   const { getTrail, version: trailVersion } = useAircraftTrails(enrichedWithPos);
   const selectedTrail = selectedHex ? getTrail(selectedHex) ?? null : null;
-  const [callsignMode, cycleCallsign] = useCallsignMode();
-  const [viewMode, toggleViewMode] = useViewMode();
+  const [callsignMode, setCallsignMode] = useCallsignMode();
+  const [viewMode, setViewMode] = useViewMode();
+  const [map, setMap] = useState<MlMap | null>(null);
 
   // Derivamos el avión seleccionado de la lista enriquecida (mantiene posición
   // y datos al día en cada poll).
@@ -67,6 +70,28 @@ export default function App() {
     setSelectedHex(hex);
   }, []);
 
+  // Desde el buscador: selecciona y centra el mapa en el avión.
+  const handlePick = useCallback(
+    (hex: string) => {
+      setSelectedHex(hex);
+      const a = enrichedWithPos.find((x) => x.hex === hex);
+      if (a && map) {
+        map.flyTo({ center: [a.lon!, a.lat!], zoom: Math.max(map.getZoom(), 9.5), essential: true });
+      }
+    },
+    [enrichedWithPos, map],
+  );
+
+  // Esc cierra el detalle (si no se está escribiendo en un campo).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const el = e.target as HTMLElement | null;
+      if (e.key === 'Escape' && !(el && el.tagName === 'INPUT')) setSelectedHex(null);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
   return (
     <div className="relative h-[100dvh] w-screen overflow-hidden">
       <Map
@@ -78,17 +103,24 @@ export default function App() {
         trailVersion={trailVersion}
         callsignMode={callsignMode}
         viewMode={viewMode}
+        onMapReady={setMap}
       />
-      <AirportCard
+      <Topbar
+        aircraft={enrichedWithPos}
         online={online}
         now={now}
         metar={metar}
+        metarEnabled={METAR_ENABLED}
         darkMode={darkMode}
         onToggleDark={toggleDark}
+        onPick={handlePick}
+      />
+      <MapControls
+        map={map}
         callsignMode={callsignMode}
-        onCycleCallsign={cycleCallsign}
+        onCallsignMode={setCallsignMode}
         viewMode={viewMode}
-        onToggleViewMode={toggleViewMode}
+        onViewMode={setViewMode}
       />
       <SidePanel
         aircraft={enriched}
