@@ -51,7 +51,7 @@ export function AircraftDetail({ aircraft, info, trailLength, following, onToggl
 
   const callsign = cleanCallsign(aircraft.flight) || aircraft.hex.toUpperCase();
   const reg = aircraft.r || info?.registration || '—';
-  const type = aircraft.t || info?.fullType || info?.icaoType || '—';
+  const type = info?.fullType || aircraft.t || info?.icaoType || '—';
   const hasPos = typeof aircraft.lat === 'number' && typeof aircraft.lon === 'number';
 
   const code = airlineCode(callsign);

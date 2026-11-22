@@ -45,7 +45,9 @@ export default function App() {
         return {
           ...a,
           r: a.r || info.registration,
-          t: a.t || info.fullType || info.icaoType,
+          // `t` debe ser el código ICAO (B738, A320…): de él dependen el icono del mapa y la
+          // silueta. El nombre largo del modelo (fullType) no sirve para clasificar.
+          t: a.t || info.icaoType || info.fullType,
         };
       }),
     [aircraft, db],
