@@ -27,6 +27,7 @@ interface Props {
   followHex?: string | null;
   /** El usuario movió el mapa a mano: dejar de seguir. */
   onStopFollow?: () => void;
+  onAirportSelect?: (icao: string) => void;
 }
 
 // Registra los 5 sprites (uno por familia visual) con la paleta del modo.
@@ -191,6 +192,7 @@ export function Map({
   onMapReady,
   followHex = null,
   onStopFollow,
+  onAirportSelect,
 }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MlMap | null>(null);
@@ -199,6 +201,8 @@ export function Map({
   const onSelectRef = useRef(onSelect);
   const aircraftRef = useRef<Aircraft[]>(aircraft);
   const followedHexRef = useRef<string | null>(null);
+  const onAirportSelectRef = useRef(onAirportSelect);
+  onAirportSelectRef.current = onAirportSelect;
   const onStopFollowRef = useRef(onStopFollow);
   onStopFollowRef.current = onStopFollow;
   const onMapReadyRef = useRef(onMapReady);
@@ -376,6 +380,16 @@ export function Map({
         const hits = map.queryRenderedFeatures(e.point, { layers: clickableLayers });
         if (hits.length === 0) onSelectRef.current(null);
       });
+
+      // Clic en un aeropuerto: abre su panel (los aviones tienen prioridad si coinciden).
+      map.on('click', 'airports-halo', (e) => {
+        const hitsAircraft = map.queryRenderedFeatures(e.point, { layers: clickableLayers });
+        if (hitsAircraft.length > 0) return;
+        const icao = e.features?.[0]?.properties?.icao;
+        if (icao) onAirportSelectRef.current?.(String(icao));
+      });
+      map.on('mouseenter', 'airports-halo', () => { map.getCanvas().style.cursor = 'pointer'; });
+      map.on('mouseleave', 'airports-halo', () => { map.getCanvas().style.cursor = ''; });
 
       for (const layer of clickableLayers) {
         map.on('mouseenter', layer, () => { map.getCanvas().style.cursor = 'pointer'; });

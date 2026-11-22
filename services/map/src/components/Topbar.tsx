@@ -15,6 +15,7 @@ interface Props {
   darkMode: boolean;
   onToggleDark: () => void;
   onPick: (hex: string) => void;
+  onOpenAirport?: () => void;
 }
 
 const MAX_RESULTS = 8;
@@ -23,7 +24,7 @@ function haystack(a: Aircraft): string {
   return [cleanCallsign(a.flight), a.r, a.t, a.hex].filter(Boolean).join(' ').toLowerCase();
 }
 
-export function Topbar({ aircraft, online, now, metar, metarEnabled, darkMode, onToggleDark, onPick }: Props) {
+export function Topbar({ aircraft, online, now, metar, metarEnabled, darkMode, onToggleDark, onPick, onOpenAirport }: Props) {
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -77,14 +78,18 @@ export function Topbar({ aircraft, online, now, metar, metarEnabled, darkMode, o
             <span className="hidden text-xs font-normal text-gray-400 md:inline">Map</span>
           </div>
 
-          {/* Chip del aeropuerto base */}
-          <span
+          {/* Chip del aeropuerto base: abre su panel */}
+          <button
+            type="button"
             title={HOME_AIRPORT.name || t('map.homeChip')}
-            className="hidden shrink-0 items-center gap-1.5 rounded-full border border-black/10 px-2.5 py-1 text-xs font-semibold text-gray-700 dark:border-white/10 dark:text-gray-200 sm:inline-flex"
+            aria-label={`${t('map.homeChip')}: ${place}`}
+            disabled={!HOME_AIRPORT.icao || !onOpenAirport}
+            onClick={onOpenAirport}
+            className="hidden shrink-0 items-center gap-1.5 rounded-full border border-black/10 px-2.5 py-1 text-xs font-semibold text-gray-700 transition-colors enabled:hover:bg-black/5 dark:border-white/10 dark:text-gray-200 dark:enabled:hover:bg-white/8 sm:inline-flex"
           >
             <span className="h-1.5 w-1.5 rounded-full bg-[#FF9F0A]" />
             {place}
-          </span>
+          </button>
 
           {/* Buscador */}
           <div ref={boxRef} className="relative mx-auto w-full max-w-md flex-1">

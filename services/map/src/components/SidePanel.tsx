@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import { t, type Aircraft, type AircraftInfo, type StatsResponse } from '@flightflow/shared';
+import { t, type Aircraft, type AircraftInfo, type Metar, type StatsResponse } from '@flightflow/shared';
 import { TrafficList } from './TrafficList';
 import { StatsPanel } from './StatsPanel';
 import { AircraftDetail } from './AircraftDetail';
+import { AirportPanel } from './AirportPanel';
+import type { Airport } from '../data/airports';
 import { Segmented } from './ui/Segmented';
 
 interface Props {
@@ -16,6 +18,11 @@ interface Props {
   trailLength: number;
   following: boolean;
   onToggleFollow: () => void;
+  airport: Airport | null;
+  isHomeAirport: boolean;
+  metar: Metar | null;
+  onCloseAirport: () => void;
+  onCenterAirport: () => void;
 }
 
 type Tab = 'traffic' | 'stats';
@@ -31,6 +38,11 @@ export function SidePanel({
   trailLength,
   following,
   onToggleFollow,
+  airport,
+  isHomeAirport,
+  metar,
+  onCloseAirport,
+  onCenterAirport,
 }: Props) {
   const [tab, setTab] = useState<Tab>('traffic');
   const [collapsed, setCollapsed] = useState(true);
@@ -44,7 +56,15 @@ export function SidePanel({
     prevHexRef.current = selectedHex;
   }, [selectedHex]);
 
+  // Al abrir un aeropuerto, el panel se despliega.
+  const prevAirportRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (airport && prevAirportRef.current !== airport.icao) setCollapsed(false);
+    prevAirportRef.current = airport?.icao ?? null;
+  }, [airport]);
+
   const showDetail = selectedAircraft != null;
+  const showAirport = !showDetail && airport != null;
 
   return (
     <div className="sidepanel-container" data-collapsed={collapsed}>
@@ -81,6 +101,18 @@ export function SidePanel({
               following={following}
               onToggleFollow={onToggleFollow}
               onClose={() => onSelect(null)}
+            />
+          </div>
+        ) : showAirport ? (
+          <div className="min-h-0 flex-1 overflow-y-auto">
+            <AirportPanel
+              airport={airport}
+              isHome={isHomeAirport}
+              metar={metar}
+              aircraft={withPosition}
+              onClose={onCloseAirport}
+              onCenter={onCenterAirport}
+              onSelect={onSelect}
             />
           </div>
         ) : (

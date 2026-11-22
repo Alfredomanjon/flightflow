@@ -11,11 +11,12 @@ import {
   usePolling,
   type Aircraft,
 } from '@flightflow/shared';
-import { METAR_ENABLED, METAR_REFRESH_MS, ONLINE_TIMEOUT_MS, REFRESH_MS, STATS_REFRESH_MS } from './config';
+import { HOME_AIRPORT, METAR_ENABLED, METAR_REFRESH_MS, ONLINE_TIMEOUT_MS, REFRESH_MS, STATS_REFRESH_MS } from './config';
 import { useAircraftTrails } from './hooks/useAircraftTrails';
 import { useCallsignMode } from './hooks/useCallsignMode';
 import { useViewMode } from './hooks/useViewMode';
 import { Map } from './components/Map';
+import { findAirport } from './data/airports';
 import { Topbar } from './components/Topbar';
 import { MapControls } from './components/MapControls';
 import { SidePanel } from './components/SidePanel';
@@ -30,6 +31,7 @@ export default function App() {
     return h && /^[0-9a-f]{6}$/i.test(h) ? h.toLowerCase() : null;
   });
   const [following, setFollowing] = useState(false);
+  const [airportIcao, setAirportIcao] = useState<string | null>(null);
 
   const hexes = useMemo(() => aircraft.map((a) => a.hex), [aircraft]);
   // Demo traffic uses fictitious hex codes: don't look them up.
@@ -73,7 +75,24 @@ export default function App() {
   const handleSelect = useCallback((hex: string | null) => {
     setSelectedHex(hex);
     setFollowing(false);
+    if (hex) setAirportIcao(null);
   }, []);
+
+  const airport = airportIcao ? findAirport(airportIcao) ?? null : null;
+  const openHomeAirport = useCallback(() => {
+    if (!HOME_AIRPORT.icao) return;
+    setSelectedHex(null);
+    setFollowing(false);
+    setAirportIcao(HOME_AIRPORT.icao);
+  }, []);
+  const openAirport = useCallback((icao: string) => {
+    setSelectedHex(null);
+    setFollowing(false);
+    setAirportIcao(icao);
+  }, []);
+  const centerAirport = useCallback(() => {
+    if (airport && map) map.flyTo({ center: [airport.lon, airport.lat], zoom: 11, essential: true });
+  }, [airport, map]);
 
   // La URL refleja el avión seleccionado (?hex=…) para poder compartirlo.
   useEffect(() => {
@@ -88,6 +107,7 @@ export default function App() {
     (hex: string) => {
       setSelectedHex(hex);
       setFollowing(false);
+      setAirportIcao(null);
       const a = enrichedWithPos.find((x) => x.hex === hex);
       if (a && map) {
         map.flyTo({ center: [a.lon!, a.lat!], zoom: Math.max(map.getZoom(), 9.5), essential: true });
@@ -123,6 +143,7 @@ export default function App() {
         onMapReady={setMap}
         followHex={following ? selectedHex : null}
         onStopFollow={() => setFollowing(false)}
+        onAirportSelect={openAirport}
       />
       <Topbar
         aircraft={enrichedWithPos}
@@ -133,6 +154,7 @@ export default function App() {
         darkMode={darkMode}
         onToggleDark={toggleDark}
         onPick={handlePick}
+        onOpenAirport={openHomeAirport}
       />
       <MapControls
         map={map}
@@ -152,6 +174,11 @@ export default function App() {
         trailLength={trailLength}
         following={following}
         onToggleFollow={() => setFollowing((f) => !f)}
+        airport={airport}
+        isHomeAirport={airport?.icao === HOME_AIRPORT.icao}
+        metar={metar}
+        onCloseAirport={() => setAirportIcao(null)}
+        onCenterAirport={centerAirport}
       />
     </div>
   );
