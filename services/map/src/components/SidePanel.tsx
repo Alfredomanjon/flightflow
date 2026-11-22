@@ -76,10 +76,18 @@ export function SidePanel({
         title={collapsed ? t('map.showPanel') : t('map.hidePanel')}
         aria-label={collapsed ? t('map.showPanel') : t('map.hidePanel')}
         aria-expanded={!collapsed}
-        className="sidepanel-toggle glass flex items-center justify-center text-gray-500 transition-colors hover:text-gray-900 dark:text-[#8E8E93] dark:hover:text-white"
+        className="sidepanel-toggle glass group flex items-center justify-center text-gray-500 transition-colors hover:text-gray-900 dark:text-[#8E8E93] dark:hover:text-white"
       >
         <ChevronDownIcon className="toggle-chevron sm:hidden" />
-        <SidebarIcon className="toggle-panel hidden sm:block" />
+        <span
+          className={`hidden h-10 w-10 items-center justify-center rounded-xl transition-colors sm:flex ${
+            collapsed
+              ? 'group-hover:bg-black/5 dark:group-hover:bg-white/8'
+              : 'bg-[#007AFF]/10 text-[#007AFF] dark:bg-[#0A84FF]/15 dark:text-[#0A84FF]'
+          }`}
+        >
+          <SidebarIcon className="h-5 w-5" />
+        </span>
       </button>
 
       {/* Panel principal */}
