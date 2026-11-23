@@ -337,7 +337,8 @@ export function Map({
         source: 'aircraft',
         layout: {
           'icon-image': ['get', 'iconImage'] as never,
-          'icon-size': 0.55,
+          // Crece al acercar el zoom: de 5 a 12 el icono pasa de ~0,5 a ~0,9 de su tamaño.
+          'icon-size': ['interpolate', ['linear'], ['zoom'], 5, 0.5, 9, 0.68, 12, 0.9] as never,
           'icon-rotate': ['get', 'rotate'],
           'icon-rotation-alignment': 'map',
           'icon-allow-overlap': true,
