@@ -194,101 +194,154 @@ function nacelle(x: number, y: number, len: number, w: number): string {
   return `<rect x="${f(x - w / 2)}" y="${f(y)}" width="${f(w)}" height="${f(len)}" rx="${f(w / 2)}"/>`;
 }
 
+/**
+ * Silueta uniforme: todas las piezas se pintan primero con un trazo grueso del color del
+ * contorno y después con el relleno, de modo que queda un único borde exterior sin líneas
+ * internas entre ala, motores y fuselaje.
+ */
+function unified(shapes: string, c: Colors, extra = ''): string {
+  return (
+    `<g fill="${c.stroke}" stroke="${c.stroke}" stroke-width="${f(c.sw * 2)}" stroke-linejoin="round">${shapes}</g>` +
+    `<g fill="${c.fill}" stroke="none">${shapes}</g>` +
+    extra
+  );
+}
+
+/** Y del borde de ataque del ala a la distancia x del eje. */
+function leadingEdge(wing: Surface, rootX: number, x: number): number {
+  const t = Math.min(1, Math.max(0, (x - rootX) / (wing.half - rootX)));
+  return wing.y + wing.sweep * t;
+}
+
+interface Engine {
+  x: number;
+  /** Cuánto sobresale el morro de la góndola por delante del borde de ataque. */
+  fwd: number;
+  len: number;
+  w: number;
+}
+
 interface JetSpec {
   h: number;
   w: number;
   wing: Surface;
   tail: Surface;
-  /** Motores bajo el ala: [x, y, largo, ancho] */
-  engines?: [number, number, number, number][];
-  /** Aletas de punta de ala (738/A320 sharklets). */
+  /** Motores bajo el ala (se dibujan por debajo de ella; solo asoma su parte delantera). */
+  engines?: Engine[];
+  /** Aletas de punta de ala. */
   tipFin?: boolean;
 }
 
 function renderJet(spec: JetSpec, c: Colors): string {
   const { h, w, wing, tail, engines = [], tipFin } = spec;
-  const style = `fill="${c.fill}" stroke="${c.stroke}" stroke-width="${c.sw}" stroke-linejoin="round"`;
-  let out = '';
-  out += `<path d="${surface(wing, w * 0.8)}" ${style}/>`;
-  out += `<path d="${surface(tail, w * 0.6)}" ${style}/>`;
+  const rootX = w * 0.8;
+  let shapes = '';
+  // Orden: motores (debajo) → ala → estabilizador → fuselaje.
+  for (const e of engines) {
+    const y = leadingEdge(wing, rootX, e.x) - e.fwd;
+    shapes += nacelle(e.x, y, e.len, e.w) + nacelle(-e.x, y, e.len, e.w);
+  }
+  shapes += `<path d="${surface(wing, rootX)}"/>`;
   if (tipFin) {
     for (const sx of [1, -1]) {
       const x = sx * wing.half;
       const yl = wing.y + wing.sweep;
-      out += `<path d="M${f(x)} ${f(yl)}L${f(x + sx * 1.6)} ${f(yl + 0.6)}L${f(x + sx * 1.6)} ${f(yl + wing.tipChord + 1.6)}L${f(x)} ${f(yl + wing.tipChord)}Z" ${style}/>`;
+      shapes += `<path d="M${f(x)} ${f(yl)}L${f(x + sx * 1.5)} ${f(yl + 0.4)}L${f(x + sx * 1.5)} ${f(yl + wing.tipChord + 1.4)}L${f(x)} ${f(yl + wing.tipChord)}Z"/>`;
     }
   }
-  for (const [x, y, len, ew] of engines) {
-    out += `<g ${style}>${nacelle(x, y, len, ew)}${nacelle(-x, y, len, ew)}</g>`;
-  }
-  out += `<path d="${fuselage(h, w)}" ${style}/>`;
-  return out;
+  shapes += `<path d="${surface(tail, w * 0.6)}"/>`;
+  shapes += `<path d="${fuselage(h, w)}"/>`;
+  return unified(shapes, c);
 }
 
-function renderProp(c: Colors, opts: { h: number; w: number; wing: Surface; tail: Surface; engineX: number[]; engineY: number; engineLen: number; engineW: number }): string {
-  const { h, w, wing, tail, engineX, engineY, engineLen, engineW } = opts;
-  const style = `fill="${c.fill}" stroke="${c.stroke}" stroke-width="${c.sw}" stroke-linejoin="round"`;
-  let out = `<path d="${surface(wing, w * 0.8)}" ${style}/>` + `<path d="${surface(tail, w * 0.6)}" ${style}/>`;
-  for (const x of engineX) {
-    out += `<g ${style}>${nacelle(x, engineY, engineLen, engineW)}${nacelle(-x, engineY, engineLen, engineW)}</g>`;
-    for (const sx of [x, -x]) {
-      out += `<line x1="${f(sx - 4.4)}" y1="${f(engineY - 0.8)}" x2="${f(sx + 4.4)}" y2="${f(engineY - 0.8)}" stroke="${c.fill}" stroke-width="1.3" stroke-linecap="round" opacity="0.85"/>`;
-    }
-  }
-  out += `<path d="${fuselage(h, w, 0.12)}" ${style}/>`;
-  return out;
+/** Reactores con motores en el fuselaje trasero (se dibujan pegados a la cola). */
+function renderRearJet(c: Colors, big: boolean): string {
+  const h = big ? 20 : 15;
+  const w = big ? 2.1 : 1.7;
+  const wing: Surface = big
+    ? { half: 13, y: -5.6, rootChord: 8, tipChord: 2.1, sweep: 5.6 }
+    : { half: 9.8, y: -4.2, rootChord: 6.4, tipChord: 1.9, sweep: 5.6 };
+  const tail: Surface = big
+    ? { half: 6, y: h - 7.4, rootChord: 3.8, tipChord: 1.7, sweep: 2.2 }
+    : { half: 4.6, y: h - 5.4, rootChord: 3.2, tipChord: 1.5, sweep: 2.4 };
+  const ex = w + 1.9;
+  const len = big ? 6.2 : 5;
+  const ew = big ? 2.5 : 2.2;
+  const ey = h * 0.12;
+  let shapes = nacelle(ex, ey, len, ew) + nacelle(-ex, ey, len, ew);
+  shapes += `<path d="${surface(wing, w * 0.8)}"/>`;
+  shapes += `<path d="${surface(tail, w * 0.6)}"/>`;
+  shapes += `<path d="${fuselage(h, w)}"/>`;
+  return unified(shapes, c);
+}
+
+function renderTurboprop(c: Colors): string {
+  const h = 18;
+  const w = 2.1;
+  const wing: Surface = { half: 19, y: -5.4, rootChord: 7.6, tipChord: 4.6, sweep: 1.4 };
+  const tail: Surface = { half: 6.8, y: 11.6, rootChord: 4.2, tipChord: 2.6, sweep: 1.2 };
+  const ex = 7.4;
+  const frontY = leadingEdge(wing, w * 0.8, ex) - 4.4;
+  let shapes = nacelle(ex, frontY, 12, 2.8) + nacelle(-ex, frontY, 12, 2.8);
+  shapes += `<path d="${surface(wing, w * 0.8)}"/>`;
+  shapes += `<path d="${surface(tail, w * 0.6)}"/>`;
+  shapes += `<path d="${fuselage(h, w, 0.12)}"/>`;
+  const props = [ex, -ex]
+    .map(
+      (x) =>
+        `<line x1="${f(x - 4.6)}" y1="${f(frontY - 0.8)}" x2="${f(x + 4.6)}" y2="${f(frontY - 0.8)}" stroke="${c.fill}" stroke-width="1.3" stroke-linecap="round" opacity="0.85"/>`,
+    )
+    .join('');
+  return unified(shapes, c, props);
+}
+
+function renderLight(c: Colors): string {
+  const wing: Surface = { half: 12.5, y: -4.4, rootChord: 4.8, tipChord: 3.6, sweep: 0.6 };
+  const tail: Surface = { half: 4.8, y: 7.4, rootChord: 2.8, tipChord: 2, sweep: 0.6 };
+  let shapes = `<path d="${surface(wing, 1.6)}"/>`;
+  shapes += `<path d="${surface(tail, 1.2)}"/>`;
+  shapes += `<path d="${fuselage(11, 1.9, 0.14)}"/>`;
+  const prop = `<line x1="-4.4" y1="-11.8" x2="4.4" y2="-11.8" stroke="${c.fill}" stroke-width="1.3" stroke-linecap="round" opacity="0.85"/>`;
+  return unified(shapes, c, prop);
 }
 
 const SPECS: Record<Exclude<AircraftIconKind, 'turboprop' | 'light' | 'heli' | 'rearjet' | 'biz'>, JetSpec> = {
   narrow: {
     h: 24, w: 2.4,
-    wing: { half: 18, y: -3, rootChord: 10.5, tipChord: 2.6, sweep: 9.5 },
+    wing: { half: 18, y: -8.5, rootChord: 11.5, tipChord: 2.6, sweep: 8.2 },
     tail: { half: 7.2, y: 16, rootChord: 5.4, tipChord: 2, sweep: 3.2 },
-    engines: [[6.4, -5, 6.6, 2.8]],
+    engines: [{ x: 6.4, fwd: 3.4, len: 6.4, w: 2.8 }],
     tipFin: true,
   },
   b737: {
     h: 23, w: 2.3,
-    wing: { half: 17.5, y: -2, rootChord: 9.6, tipChord: 2.4, sweep: 9 },
+    wing: { half: 17.5, y: -8, rootChord: 11, tipChord: 2.4, sweep: 7.8 },
     tail: { half: 7, y: 15.4, rootChord: 5, tipChord: 2, sweep: 3 },
-    engines: [[5.6, -3.4, 6, 3.1]],
+    engines: [{ x: 5.6, fwd: 3, len: 6, w: 3.1 }],
     tipFin: true,
   },
   regional: {
     h: 19.5, w: 2.1,
-    wing: { half: 13.5, y: -2, rootChord: 8, tipChord: 2.2, sweep: 6.6 },
+    wing: { half: 13.5, y: -6.6, rootChord: 8.6, tipChord: 2.2, sweep: 6 },
     tail: { half: 5.8, y: 13, rootChord: 4.2, tipChord: 1.8, sweep: 2.6 },
-    engines: [[5, -3.6, 5.2, 2.5]],
+    engines: [{ x: 5, fwd: 2.8, len: 5.2, w: 2.5 }],
   },
   widebody: {
     h: 28, w: 2.9,
-    wing: { half: 28, y: -5, rootChord: 15, tipChord: 3.4, sweep: 15 },
+    wing: { half: 28, y: -10, rootChord: 16, tipChord: 3.4, sweep: 13.5 },
     tail: { half: 11, y: 19.5, rootChord: 7.4, tipChord: 2.8, sweep: 5.2 },
-    engines: [[11, -6, 9.4, 3.8]],
+    engines: [{ x: 11, fwd: 4, len: 9.4, w: 3.8 }],
   },
   quad: {
     h: 30, w: 3.1,
-    wing: { half: 30, y: -6, rootChord: 16, tipChord: 3.4, sweep: 17 },
+    wing: { half: 30, y: -11, rootChord: 17, tipChord: 3.4, sweep: 15.5 },
     tail: { half: 12, y: 21, rootChord: 7.8, tipChord: 3, sweep: 5.6 },
-    engines: [[9.4, -7.6, 9, 3.4], [19, -2.4, 9, 3.4]],
+    engines: [
+      { x: 9.4, fwd: 4, len: 9, w: 3.4 },
+      { x: 19, fwd: 4, len: 9, w: 3.4 },
+    ],
   },
 };
-
-function renderRearJet(c: Colors, big: boolean): string {
-  const h = big ? 20 : 15;
-  const w = big ? 2.1 : 1.7;
-  const wing: Surface = big
-    ? { half: 13, y: -1, rootChord: 7.4, tipChord: 2.1, sweep: 6 }
-    : { half: 9.8, y: -0.5, rootChord: 6, tipChord: 1.9, sweep: 6.2 };
-  const tail: Surface = big
-    ? { half: 6, y: h - 7.4, rootChord: 3.8, tipChord: 1.7, sweep: 2.2 }
-    : { half: 4.6, y: h - 5.4, rootChord: 3.2, tipChord: 1.5, sweep: 2.4 };
-  const ex = w + 2.4;
-  return renderJet(
-    { h, w, wing, tail, engines: [[ex, h * 0.18, big ? 6.2 : 5, 2.5]] },
-    c,
-  );
-}
 
 function planeHeli(c: Colors): string {
   const style = `fill="${c.fill}" stroke="${c.stroke}" stroke-width="${c.sw}" stroke-linejoin="round"`;
@@ -308,18 +361,6 @@ function planeHeli(c: Colors): string {
   );
 }
 
-function renderLight(c: Colors): string {
-  const style = `fill="${c.fill}" stroke="${c.stroke}" stroke-width="${c.sw}" stroke-linejoin="round"`;
-  const wing: Surface = { half: 12.5, y: -3.4, rootChord: 4.6, tipChord: 3.6, sweep: 0.6 };
-  const tail: Surface = { half: 4.8, y: 7.4, rootChord: 2.8, tipChord: 2, sweep: 0.6 };
-  return (
-    `<path d="${surface(wing, 1.6)}" ${style}/>` +
-    `<path d="${surface(tail, 1.2)}" ${style}/>` +
-    `<path d="${fuselage(11, 1.9, 0.14)}" ${style}/>` +
-    `<line x1="-4.4" y1="-11.6" x2="4.4" y2="-11.6" stroke="${c.fill}" stroke-width="1.3" stroke-linecap="round" opacity="0.85"/>`
-  );
-}
-
 function bodySvg(kind: AircraftIconKind, c: Colors): string {
   switch (kind) {
     case 'heli':
@@ -331,12 +372,7 @@ function bodySvg(kind: AircraftIconKind, c: Colors): string {
     case 'biz':
       return renderRearJet(c, false);
     case 'turboprop':
-      return renderProp(c, {
-        h: 18, w: 2.1,
-        wing: { half: 19, y: -4.5, rootChord: 7.4, tipChord: 4.6, sweep: 1.6 },
-        tail: { half: 6.8, y: 11.6, rootChord: 4.2, tipChord: 2.6, sweep: 1.2 },
-        engineX: [7.4], engineY: -8.6, engineLen: 12, engineW: 2.8,
-      });
+      return renderTurboprop(c);
     default:
       return renderJet(SPECS[kind], c);
   }
