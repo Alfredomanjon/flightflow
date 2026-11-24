@@ -70,7 +70,9 @@ export function Topbar({ aircraft, online, now, metar, metarEnabled, darkMode, o
   return (
     <>
       <header className="glass-strong absolute inset-x-0 top-0 z-30 border-b border-black/5 pt-[env(safe-area-inset-top)] dark:border-white/10">
-        <div className="flex h-14 items-center gap-2 px-3 sm:gap-3 sm:px-4">
+        {/* En pantallas anchas: rejilla 1fr · buscador · 1fr, así el buscador queda centrado
+            aunque el grupo izquierdo y el derecho midan distinto. */}
+        <div className="flex h-14 items-center gap-2 px-3 sm:gap-3 sm:px-4 lg:grid lg:grid-cols-[1fr_minmax(0,28rem)_1fr]">
           {/* Logo */}
           <div className="flex shrink-0 items-center gap-2">
             <PlaneIcon className="h-5 w-5 text-[#007AFF]" />
@@ -150,7 +152,7 @@ export function Topbar({ aircraft, online, now, metar, metarEnabled, darkMode, o
           </div>
 
           {/* Estado, hora y tema */}
-          <div className="flex shrink-0 items-center gap-1.5">
+          <div className="flex shrink-0 items-center justify-end gap-1.5">
             {/* Aeropuerto base (mismo color que su marcador en el mapa): abre su panel */}
             <button
               type="button"
