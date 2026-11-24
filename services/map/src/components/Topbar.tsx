@@ -4,7 +4,7 @@ import { HOME_AIRPORT } from '../config';
 import { classifyAircraft } from '../lib/aircraftIcon';
 import { IconButton } from './ui/IconButton';
 import { StatusBadge } from './ui/StatusBadge';
-import { CloseIcon, MoonIcon, PlaneIcon, SearchIcon, SunIcon } from './ui/icons';
+import { CloseIcon, MoonIcon, PlaneIcon, SearchIcon, SunIcon, TowerIcon } from './ui/icons';
 
 interface Props {
   aircraft: Aircraft[];
@@ -78,19 +78,6 @@ export function Topbar({ aircraft, online, now, metar, metarEnabled, darkMode, o
             <span className="hidden text-xs font-normal text-gray-400 md:inline">Map</span>
           </div>
 
-          {/* Chip del aeropuerto base: abre su panel */}
-          <button
-            type="button"
-            title={HOME_AIRPORT.name || t('map.homeChip')}
-            aria-label={`${t('map.homeChip')}: ${place}`}
-            disabled={!HOME_AIRPORT.icao || !onOpenAirport}
-            onClick={onOpenAirport}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-black/10 px-2.5 py-1 text-xs font-semibold text-gray-700 transition-colors enabled:hover:bg-black/5 dark:border-white/10 dark:text-gray-200 dark:enabled:hover:bg-white/8"
-          >
-            <span className="h-1.5 w-1.5 rounded-full bg-[#FF9F0A]" />
-            {place}
-          </button>
-
           {/* Buscador */}
           <div ref={boxRef} className="relative mx-auto w-full max-w-md flex-1">
             <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
@@ -163,7 +150,20 @@ export function Topbar({ aircraft, online, now, metar, metarEnabled, darkMode, o
           </div>
 
           {/* Estado, hora y tema */}
-          <div className="flex shrink-0 items-center gap-1">
+          <div className="flex shrink-0 items-center gap-1.5">
+            {/* Aeropuerto base (mismo color que su marcador en el mapa): abre su panel */}
+            <button
+              type="button"
+              title={HOME_AIRPORT.name || t('map.homeChip')}
+              aria-label={`${t('map.airportLabel')}: ${place}`}
+              disabled={!HOME_AIRPORT.icao || !onOpenAirport}
+              onClick={onOpenAirport}
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[#FF9F0A]/15 px-2.5 py-1 text-xs font-semibold text-[#B36B00] transition-colors enabled:hover:bg-[#FF9F0A]/25 dark:text-[#FF9F0A]"
+            >
+              <TowerIcon className="h-3.5 w-3.5" />
+              <span className="hidden font-medium opacity-80 lg:inline">{t('map.airportLabel')}</span>
+              {place}
+            </button>
             <span className="hidden sm:inline-flex">
               <StatusBadge ok={online} />
             </span>

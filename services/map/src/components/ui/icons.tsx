@@ -128,3 +128,8 @@ export const ArrowDownIcon = (p: IconProps) => (
 export const SidebarIcon = (p: IconProps) => (
   <Icon {...p}><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M9 3v18" /></Icon>
 );
+export const TowerIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M12 3v3M8 6h8l1.5 6h-11L8 6ZM6.5 12 8 21M17.5 12 16 21M7.2 17h9.6" />
+  </Icon>
+);
