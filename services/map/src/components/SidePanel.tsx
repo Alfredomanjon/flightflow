@@ -93,7 +93,7 @@ export function SidePanel({
       {/* Panel principal */}
       <div className="sidepanel glass flex flex-col rounded-2xl p-3">
         {showDetail ? (
-          <div className="min-h-0 flex-1 overflow-y-auto">
+          <div className="min-h-0 flex-1 no-scrollbar overflow-y-auto">
             <AircraftDetail
               aircraft={selectedAircraft}
               info={selectedAircraftInfo}
@@ -104,7 +104,7 @@ export function SidePanel({
             />
           </div>
         ) : showAirport ? (
-          <div className="min-h-0 flex-1 overflow-y-auto">
+          <div className="min-h-0 flex-1 no-scrollbar overflow-y-auto">
             <AirportPanel
               airport={airport}
               isHome={isHomeAirport}
@@ -141,7 +141,7 @@ export function SidePanel({
             {tab === 'traffic' ? (
               <TrafficList aircraft={aircraft} selectedHex={selectedHex} onSelect={onSelect} />
             ) : (
-              <div className="min-h-0 flex-1 overflow-y-auto">
+              <div className="min-h-0 flex-1 no-scrollbar overflow-y-auto">
                 <StatsPanel stats={stats} total={aircraft.length} withPos={withPosition.length} />
               </div>
             )}

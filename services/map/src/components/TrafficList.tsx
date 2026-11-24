@@ -118,7 +118,7 @@ export function TrafficList({ aircraft, selectedHex, onSelect }: Props) {
         {header('dist', `${distanceUnit()}`, 'right')}
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto">
+      <div className="min-h-0 flex-1 no-scrollbar overflow-y-auto">
         {visible.map(({ a, callsign, dist, alt, kind }) => {
           const selected = selectedHex === a.hex;
           return (
