@@ -16,36 +16,37 @@ type Palette = {
   textHalo: string;
 };
 
+// Paleta neutra y desaturada: el mapa es el fondo, los aviones son los protagonistas.
 export const LIGHT_PALETTE: Palette = {
-  land:          '#bce5a0',
-  park:          '#9fd684',
-  forest:        '#94cf77',
-  residential:   '#aedb91',
-  water:         '#7fbfe6',
+  land:          '#eceef1',
+  park:          '#dfe8d6',
+  forest:        '#d6e3cb',
+  residential:   '#e5e8ec',
+  water:         '#c6dcf0',
   road:          '#ffffff',
-  roadCasing:    '#d4e6cc',
-  motorway:      '#ffe8a3',
-  motorwayCasing:'#e8c98a',
-  building:      '#dfe7d7',
-  boundary:      '#8ba398',
-  textPrimary:   '#3f4661',
+  roadCasing:    '#dcdfe4',
+  motorway:      '#fff3d1',
+  motorwayCasing:'#e6d3a0',
+  building:      '#e0e3e8',
+  boundary:      '#9aa1ac',
+  textPrimary:   '#6b7280',
   textHalo:      'rgba(255,255,255,0.9)',
 };
 
 export const DARK_PALETTE: Palette = {
-  land:          '#2d6b3e',
-  park:          '#1f5029',
-  forest:        '#1a4524',
-  residential:   '#265835',
-  water:         '#0c1d50',
-  road:          '#d8e4e0',
-  roadCasing:    '#1a5030',
-  motorway:      '#f0e070',
-  motorwayCasing:'#9a8020',
-  building:      '#3a6545',
-  boundary:      '#4a7060',
-  textPrimary:   '#ffffff',
-  textHalo:      'rgba(15,50,28,0.9)',
+  land:          '#1c1c1e',
+  park:          '#1f2a22',
+  forest:        '#1b261e',
+  residential:   '#202023',
+  water:         '#0d1b2e',
+  road:          '#3a3a3c',
+  roadCasing:    '#2a2a2c',
+  motorway:      '#5a4a20',
+  motorwayCasing:'#3a3016',
+  building:      '#262629',
+  boundary:      '#58585c',
+  textPrimary:   '#8e8e93',
+  textHalo:      'rgba(0,0,0,0.85)',
 };
 
 function set(map: MlMap, id: string, prop: string, val: unknown) {
@@ -91,7 +92,7 @@ export function applyMapPalette(map: MlMap, dark: boolean): void {
         set(map, id, 'fill-color', p.building);
         set(map, id, 'fill-opacity', 0.85);
       } else if (id.startsWith('aeroway')) {
-        set(map, id, 'fill-color', dark ? '#3a6040' : 'rgba(255,255,255,1)');
+        set(map, id, 'fill-color', dark ? '#2a2a2c' : '#ffffff');
       }
     }
 
@@ -107,9 +108,9 @@ export function applyMapPalette(map: MlMap, dark: boolean): void {
         set(map, id, 'line-color', p.boundary);
         set(map, id, 'line-opacity', 0.6);
       } else if (id.startsWith('railway')) {
-        set(map, id, 'line-color', dark ? '#4a7060' : '#dddddd');
+        set(map, id, 'line-color', dark ? '#3a3a3c' : '#d4d7dc');
       } else if (id.startsWith('aeroway')) {
-        set(map, id, 'line-color', dark ? '#3a6545' : 'rgba(255,255,255,1)');
+        set(map, id, 'line-color', dark ? '#3a3a3c' : '#ffffff');
       }
     }
 

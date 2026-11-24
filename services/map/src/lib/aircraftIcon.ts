@@ -1,53 +1,68 @@
-// Clasificación de aviones en 5 familias visuales y generación de SVGs.
+// Clasificación de aviones por familia visual y generación de iconos SVG cenitales
+// (vista desde arriba, morro hacia arriba). Cada familia tiene su propia silueta:
+// motores bajo el ala, motores traseros, hélices, cuatro motores, etc.
 
-export type AircraftIconKind = 'heavy' | 'narrow' | 'regional' | 'biz' | 'heli';
+export type AircraftIconKind =
+  | 'narrow'    // A318–A321 / 757 y genérico de pasillo único
+  | 'b737'      // familia Boeing 737
+  | 'regional'  // E-Jets, A220: reactor pequeño con motores bajo el ala
+  | 'rearjet'   // CRJ, ERJ, MD-80, 717, Superjet: motores traseros
+  | 'turboprop' // ATR, Dash 8, Saab…
+  | 'widebody'  // bimotor de fuselaje ancho (777, 787, A330, A350…)
+  | 'quad'      // cuatro motores (747, A380, A340…)
+  | 'biz'       // jets ejecutivos
+  | 'light'     // aviación ligera de hélice
+  | 'heli';
 
-export const ICON_KINDS: AircraftIconKind[] = ['heavy', 'narrow', 'regional', 'biz', 'heli'];
+export const ICON_KINDS: AircraftIconKind[] = [
+  'narrow', 'b737', 'regional', 'rearjet', 'turboprop', 'widebody', 'quad', 'biz', 'light', 'heli',
+];
 
-const HEAVY = new Set([
-  // Widebody Airbus
-  'A332','A333','A338','A339','A342','A343','A345','A346','A359','A35K',
-  'A380','A388','A30B','A306','A310','A30F','A300','A30W',
-  // Widebody Boeing
-  'B742','B743','B744','B748','B74F','B74D','B74R',
-  'B762','B763','B764','B77F',
-  'B772','B773','B77L','B77W','B778','B779',
-  'B783','B788','B789','B78X','B787',
-  // Otros widebody
-  'IL96','MD11','DC10','L101',
+const QUAD = new Set([
+  'A342','A343','A345','A346','A388','A380',
+  'B741','B742','B743','B744','B748','B74D','B74F','B74R','B74S','BLCF',
+  'A124','IL96','IL76','C17','C5M','A400','B52',
+]);
+
+const WIDEBODY = new Set([
+  'A332','A333','A338','A339','A337','A3ST','A359','A35K','A310','A306','A30B','A300','A30F','A30W',
+  'B762','B763','B764','B76F','B772','B773','B77L','B77W','B778','B779','B77F',
+  'B788','B789','B78X','B787','B783','MD11','DC10','L101','IL86',
+]);
+
+const B737 = new Set([
+  'B731','B732','B733','B734','B735','B736','B737','B738','B739',
+  'B73G','B73H','B73J','B73K','B73L','B73M','B73N','B37M','B38M','B39M','B3XM',
 ]);
 
 const NARROW = new Set([
-  // Airbus narrow-body
-  'A318','A319','A320','A321','A19N','A20N','A21N',
-  'A220','A221','A223','BCS1','BCS3',
-  // Boeing narrow-body
-  'B731','B732','B733','B734','B735','B736','B737','B738','B739',
-  'B73G','B73H','B73J','B73K','B73L','B73M','B73N',
-  'B752','B753','B757',
-  // Embraer E-Jets
-  'E170','E175','E190','E195','E290','E295',
-  // CRJ regional largos
-  'CRJ7','CRJ9','CRJX','CRJ10',
-  // MDxx
-  'MD80','MD81','MD82','MD83','MD87','MD88','MD90','MD95',
-  // Sukhoi
-  'SU95','SSJ','SSJ100',
+  'A318','A319','A320','A321','A19N','A20N','A21N','B752','B753','B757',
 ]);
 
+// Reactores regionales con motores bajo el ala
 const REGIONAL = new Set([
-  // Turboprops
-  'AT42','AT43','AT44','AT45','AT46','AT72','AT73','AT75','AT76',
-  'DH8A','DH8B','DH8C','DH8D','DHC8','DH4','DH3','DHC6',
-  'SF34','SF50','SB20','SB05','J31','J32','J41',
-  'BE99','BE19','D228','D328','D38','F27','F50','F60','F70','F100',
-  'AT2','AT3','AT4','AT5','AT7',
-  // Regional jets
-  'CRJ1','CRJ2','CRJ200',
-  'E110','E120','E135','E140','E145','E45X','EM2',
+  'A220','A221','A223','BCS1','BCS3',
+  'E170','E175','E190','E195','E290','E295','E75L','E75S','E7W',
+  'B461','B462','B463',
 ]);
 
-// Business jets — comprobamos por prefijo además de set exacto
+// Reactores con motores en el fuselaje trasero
+const REARJET = new Set([
+  'CRJ1','CRJ2','CRJ200','CRJ7','CRJ9','CRJX','CRJ10',
+  'E135','E140','E145','E35L','E45X',
+  'MD80','MD81','MD82','MD83','MD87','MD88','MD90','MD95',
+  'B712','DC91','DC92','DC93','DC94','DC95','B721','B722','F28','F70','F100','F60',
+  'SU95','SSJ','SSJ100','BA11','RJ70','RJ85','RJ1H',
+]);
+
+const TURBOPROP = new Set([
+  'AT42','AT43','AT44','AT45','AT46','AT72','AT73','AT75','AT76','AT2','AT3','AT4','AT5','AT7',
+  'DH8A','DH8B','DH8C','DH8D','DHC8','DH4','DH3','DHC6','DHC5',
+  'SF34','SF50','SB20','SB05','J31','J32','J41','JS31','JS32','JS41',
+  'BE99','BE19','BE20','B190','D228','D328','D38','F27','F50','E110','E120','SW4',
+  'AN24','AN26','AN32','L410','C130','C30J','CN35','C295',
+]);
+
 const BIZ_PREFIX = [
   'C25','C56','C68','C50','C51','C52','C55','C560','C650','C680','C750',
   'CCJ','CCX','CL30','CL35','CL60','CL64','CL65','CL70','CL85',
@@ -88,7 +103,7 @@ const HELI = new Set([
   // Leonardo / Agusta
   'A109','A119','A139','A149','A169','A189','A39','AW09','AW11','AW13','AW14','AW16','AW18','AW19',
   // MD Helicopters
-  'MD60','MD90','MD50','MD52','MD53','MD60','EH10','EH101',
+  'MD60','MD50','MD52','MD53','MD60','EH10','EH101',
   // Mil
   'MI8','MI17','MI18','MI24','MI28','MI26','MI171','MI10',
   // Kawasaki / Kamov
@@ -101,110 +116,283 @@ export function classifyAircraft(
 ): AircraftIconKind {
   const t = (type || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
   if (category === 'A7' || HELI.has(t)) return 'heli';
-  if (category === 'A5' || HEAVY.has(t)) return 'heavy';
-  if (REGIONAL.has(t)) return 'regional';
+  if (QUAD.has(t)) return 'quad';
+  if (WIDEBODY.has(t)) return 'widebody';
+  if (B737.has(t)) return 'b737';
   if (NARROW.has(t)) return 'narrow';
-  if (LIGHT.has(t)) return 'biz';
+  if (REGIONAL.has(t)) return 'regional';
+  if (REARJET.has(t)) return 'rearjet';
+  if (TURBOPROP.has(t)) return 'turboprop';
+  if (LIGHT.has(t)) return 'light';
   for (const p of BIZ_PREFIX) if (t.startsWith(p)) return 'biz';
-  if (category === 'A1' || category === 'A2') return 'biz';
-  // Fallback comercial genérico
+  // Sin código reconocido: nos apoyamos en la categoría ADS-B.
+  if (category === 'A5') return 'widebody';
+  if (category === 'A1' || category === 'B1' || category === 'B4') return 'light';
+  if (category === 'A2' || category === 'A6') return 'biz';
   return 'narrow';
 }
 
-// ─── SVG por familia ─────────────────────────────────────────────────────────
-interface SvgColors {
+// ─── Dibujo ──────────────────────────────────────────────────────────────────
+// Lienzo de 64×64 con el origen en el centro; el morro apunta a -y.
+interface Colors {
   fill: string;
   stroke: string;
   sw: number;
   halo: string;
 }
 
-function paletteFor(dark: boolean): SvgColors {
+function colorsFor(dark: boolean, selected: boolean): Colors {
   return {
-    fill: dark ? '#ffffff' : '#123b89',
-    stroke: dark ? '#0b1226' : '#ffffff',
-    sw: dark ? 1.6 : 1.4,
-    halo: dark
-      ? `<defs><radialGradient id="h" cx="0" cy="0" r="22" gradientUnits="userSpaceOnUse">
-           <stop offset="0%" stop-color="#9ab8ff" stop-opacity="0.45"/>
-           <stop offset="60%" stop-color="#9ab8ff" stop-opacity="0.10"/>
-           <stop offset="100%" stop-color="#9ab8ff" stop-opacity="0"/>
-         </radialGradient></defs>
-         <circle cx="0" cy="0" r="22" fill="url(#h)" />`
+    fill: selected ? '#FF9F0A' : dark ? '#0A84FF' : '#007AFF',
+    stroke: dark ? '#000000' : '#ffffff',
+    sw: 1.2,
+    halo: selected
+      ? '<circle cx="0" cy="0" r="28" fill="none" stroke="#FF9F0A" stroke-width="2" opacity="0.45"/>'
       : '',
   };
 }
 
-function wrap(inner: string, dark: boolean): string {
-  const { halo } = paletteFor(dark);
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-    <g transform="translate(32 32)">${halo}${inner}</g>
-  </svg>`;
-}
+const f = (n: number) => Math.round(n * 100) / 100;
 
-function planeNarrow(dark: boolean): string {
-  const { fill, stroke, sw } = paletteFor(dark);
-  return wrap(
-    `<path d="M0 -24 L4 -4 L26 6 L26 11 L4 6 L4 18 L10 22 L10 26 L0 24 L-10 26 L-10 22 L-4 18 L-4 6 L-26 11 L-26 6 L-4 -4 Z"
-       fill="${fill}" stroke="${stroke}" stroke-width="${sw}" stroke-linejoin="round"/>`,
-    dark,
+/** Fuselaje: morro redondeado y cola que se estrecha. h = media longitud, w = media anchura. */
+function fuselage(h: number, w: number, tail = 0.18): string {
+  return (
+    `M0 ${f(-h)}` +
+    `C${f(w * 0.55)} ${f(-h)} ${f(w)} ${f(-h + h * 0.22)} ${f(w)} ${f(-h + h * 0.42)}` +
+    `L${f(w)} ${f(h * 0.45)}` +
+    `C${f(w)} ${f(h * 0.7)} ${f(w * 0.4)} ${f(h * 0.9)} ${f(w * tail)} ${f(h)}` +
+    `L${f(-w * tail)} ${f(h)}` +
+    `C${f(-w * 0.4)} ${f(h * 0.9)} ${f(-w)} ${f(h * 0.7)} ${f(-w)} ${f(h * 0.45)}` +
+    `L${f(-w)} ${f(-h + h * 0.42)}` +
+    `C${f(-w)} ${f(-h + h * 0.22)} ${f(-w * 0.55)} ${f(-h)} 0 ${f(-h)}Z`
   );
 }
 
-function planeHeavy(dark: boolean): string {
-  const { fill, stroke, sw } = paletteFor(dark);
-  return wrap(
-    `<path d="M0 -28 L3 -6 L32 4 L32 9 L3 4 L3 20 L10 24 L10 28 L0 26 L-10 28 L-10 24 L-3 20 L-3 4 L-32 9 L-32 4 L-3 -6 Z"
-       fill="${fill}" stroke="${stroke}" stroke-width="${sw}" stroke-linejoin="round"/>
-     <circle cx="-22" cy="6" r="2.4" fill="${fill}" stroke="${stroke}" stroke-width="${sw * 0.7}"/>
-     <circle cx="-11" cy="3" r="2.4" fill="${fill}" stroke="${stroke}" stroke-width="${sw * 0.7}"/>
-     <circle cx="11" cy="3" r="2.4" fill="${fill}" stroke="${stroke}" stroke-width="${sw * 0.7}"/>
-     <circle cx="22" cy="6" r="2.4" fill="${fill}" stroke="${stroke}" stroke-width="${sw * 0.7}"/>`,
-    dark,
+interface Surface {
+  /** Semienvergadura. */
+  half: number;
+  /** Y del borde de ataque en la raíz. */
+  y: number;
+  rootChord: number;
+  tipChord: number;
+  /** Retraso del borde de ataque en la punta respecto a la raíz (flecha). */
+  sweep: number;
+}
+
+/** Superficie simétrica (ala o estabilizador) partiendo de la mitad del fuselaje. */
+function surface(s: Surface, rootX: number): string {
+  const { half, y, rootChord, tipChord, sweep } = s;
+  const pts = [
+    [rootX, y], [half, y + sweep], [half, y + sweep + tipChord], [rootX, y + rootChord],
+    [-rootX, y + rootChord], [-half, y + sweep + tipChord], [-half, y + sweep], [-rootX, y],
+  ];
+  return `M${pts.map(([x, yy]) => `${f(x)} ${f(yy)}`).join('L')}Z`;
+}
+
+/** Gondola de motor: cápsula con el centro en (x, y). */
+function nacelle(x: number, y: number, len: number, w: number): string {
+  return `<rect x="${f(x - w / 2)}" y="${f(y)}" width="${f(w)}" height="${f(len)}" rx="${f(w / 2)}"/>`;
+}
+
+/**
+ * Silueta uniforme: todas las piezas se pintan primero con un trazo grueso del color del
+ * contorno y después con el relleno, de modo que queda un único borde exterior sin líneas
+ * internas entre ala, motores y fuselaje.
+ */
+function unified(shapes: string, c: Colors, extra = ''): string {
+  return (
+    `<g fill="${c.stroke}" stroke="${c.stroke}" stroke-width="${f(c.sw * 2)}" stroke-linejoin="round">${shapes}</g>` +
+    `<g fill="${c.fill}" stroke="none">${shapes}</g>` +
+    extra
   );
 }
 
-function planeRegional(dark: boolean): string {
-  const { fill, stroke, sw } = paletteFor(dark);
-  // Hélices visibles en los extremos de las alas
-  return wrap(
-    `<path d="M0 -20 L4 -2 L22 6 L22 10 L4 6 L4 15 L9 18 L9 22 L0 20 L-9 22 L-9 18 L-4 15 L-4 6 L-22 10 L-22 6 L-4 -2 Z"
-       fill="${fill}" stroke="${stroke}" stroke-width="${sw}" stroke-linejoin="round"/>
-     <circle cx="-17" cy="4" r="3.4" fill="none" stroke="${stroke}" stroke-width="${sw * 1.1}"/>
-     <circle cx="17"  cy="4" r="3.4" fill="none" stroke="${stroke}" stroke-width="${sw * 1.1}"/>`,
-    dark,
-  );
+/** Y del borde de ataque del ala a la distancia x del eje. */
+function leadingEdge(wing: Surface, rootX: number, x: number): number {
+  const t = Math.min(1, Math.max(0, (x - rootX) / (wing.half - rootX)));
+  return wing.y + wing.sweep * t;
 }
 
-function planeBiz(dark: boolean): string {
-  const { fill, stroke, sw } = paletteFor(dark);
-  // Más pequeño, alas en flecha, T-tail
-  return wrap(
-    `<path d="M0 -18 L3 -2 L20 10 L20 13 L3 7 L3 12 L7 16 L7 19 L0 17 L-7 19 L-7 16 L-3 12 L-3 7 L-20 13 L-20 10 L-3 -2 Z"
-       fill="${fill}" stroke="${stroke}" stroke-width="${sw}" stroke-linejoin="round"/>`,
-    dark,
-  );
+interface Engine {
+  x: number;
+  /** Cuánto sobresale el morro de la góndola por delante del borde de ataque. */
+  fwd: number;
+  len: number;
+  w: number;
 }
 
-function planeHeli(dark: boolean): string {
-  const { fill, stroke, sw } = paletteFor(dark);
-  // Cuerpo oval + cola hacia atrás + rotor como X
-  return wrap(
-    `<line x1="-22" y1="-2" x2="22" y2="-2" stroke="${stroke}" stroke-width="${sw * 1.3}" stroke-linecap="round" opacity="0.7"/>
-     <line x1="-2"  y1="-22" x2="-2" y2="20" stroke="${stroke}" stroke-width="${sw * 1.3}" stroke-linecap="round" opacity="0.7"/>
-     <rect x="-1.5" y="2" width="3" height="20" fill="${fill}" stroke="${stroke}" stroke-width="${sw}"/>
-     <ellipse cx="0" cy="-2" rx="7" ry="10" fill="${fill}" stroke="${stroke}" stroke-width="${sw}"/>
-     <circle cx="0" cy="-2" r="2" fill="${stroke}"/>`,
-    dark,
-  );
+interface JetSpec {
+  h: number;
+  w: number;
+  wing: Surface;
+  tail: Surface;
+  /** Motores bajo el ala (se dibujan por debajo de ella; solo asoma su parte delantera). */
+  engines?: Engine[];
+  /** Aletas de punta de ala. */
+  tipFin?: boolean;
 }
 
-export function planeSvgForKind(kind: AircraftIconKind, dark: boolean): string {
-  switch (kind) {
-    case 'heavy': return planeHeavy(dark);
-    case 'narrow': return planeNarrow(dark);
-    case 'regional': return planeRegional(dark);
-    case 'biz': return planeBiz(dark);
-    case 'heli': return planeHeli(dark);
+function renderJet(spec: JetSpec, c: Colors): string {
+  const { h, w, wing, tail, engines = [], tipFin } = spec;
+  const rootX = w * 0.8;
+  let shapes = '';
+  // Orden: motores (debajo) → ala → estabilizador → fuselaje.
+  for (const e of engines) {
+    const y = leadingEdge(wing, rootX, e.x) - e.fwd;
+    shapes += nacelle(e.x, y, e.len, e.w) + nacelle(-e.x, y, e.len, e.w);
   }
+  shapes += `<path d="${surface(wing, rootX)}"/>`;
+  if (tipFin) {
+    for (const sx of [1, -1]) {
+      const x = sx * wing.half;
+      const yl = wing.y + wing.sweep;
+      shapes += `<path d="M${f(x)} ${f(yl)}L${f(x + sx * 1.5)} ${f(yl + 0.4)}L${f(x + sx * 1.5)} ${f(yl + wing.tipChord + 1.4)}L${f(x)} ${f(yl + wing.tipChord)}Z"/>`;
+    }
+  }
+  shapes += `<path d="${surface(tail, w * 0.6)}"/>`;
+  shapes += `<path d="${fuselage(h, w)}"/>`;
+  return unified(shapes, c);
+}
+
+/** Reactores con motores en el fuselaje trasero (se dibujan pegados a la cola). */
+function renderRearJet(c: Colors, big: boolean): string {
+  const h = big ? 20 : 15;
+  const w = big ? 2.1 : 1.7;
+  const wing: Surface = big
+    ? { half: 13, y: -5.6, rootChord: 8, tipChord: 2.1, sweep: 5.6 }
+    : { half: 9.8, y: -4.2, rootChord: 6.4, tipChord: 1.9, sweep: 5.6 };
+  const tail: Surface = big
+    ? { half: 6, y: h - 7.4, rootChord: 3.8, tipChord: 1.7, sweep: 2.2 }
+    : { half: 4.6, y: h - 5.4, rootChord: 3.2, tipChord: 1.5, sweep: 2.4 };
+  const ex = w + 1.9;
+  const len = big ? 6.2 : 5;
+  const ew = big ? 2.5 : 2.2;
+  const ey = h * 0.12;
+  let shapes = nacelle(ex, ey, len, ew) + nacelle(-ex, ey, len, ew);
+  shapes += `<path d="${surface(wing, w * 0.8)}"/>`;
+  shapes += `<path d="${surface(tail, w * 0.6)}"/>`;
+  shapes += `<path d="${fuselage(h, w)}"/>`;
+  return unified(shapes, c);
+}
+
+function renderTurboprop(c: Colors): string {
+  const h = 18;
+  const w = 2.1;
+  const wing: Surface = { half: 19, y: -5.4, rootChord: 7.6, tipChord: 4.6, sweep: 1.4 };
+  const tail: Surface = { half: 6.8, y: 11.6, rootChord: 4.2, tipChord: 2.6, sweep: 1.2 };
+  const ex = 7.4;
+  const frontY = leadingEdge(wing, w * 0.8, ex) - 4.4;
+  let shapes = nacelle(ex, frontY, 12, 2.8) + nacelle(-ex, frontY, 12, 2.8);
+  shapes += `<path d="${surface(wing, w * 0.8)}"/>`;
+  shapes += `<path d="${surface(tail, w * 0.6)}"/>`;
+  shapes += `<path d="${fuselage(h, w, 0.12)}"/>`;
+  const props = [ex, -ex]
+    .map(
+      (x) =>
+        `<line x1="${f(x - 4.6)}" y1="${f(frontY - 0.8)}" x2="${f(x + 4.6)}" y2="${f(frontY - 0.8)}" stroke="${c.fill}" stroke-width="1.3" stroke-linecap="round" opacity="0.85"/>`,
+    )
+    .join('');
+  return unified(shapes, c, props);
+}
+
+function renderLight(c: Colors): string {
+  const wing: Surface = { half: 12.5, y: -4.4, rootChord: 4.8, tipChord: 3.6, sweep: 0.6 };
+  const tail: Surface = { half: 4.8, y: 7.4, rootChord: 2.8, tipChord: 2, sweep: 0.6 };
+  let shapes = `<path d="${surface(wing, 1.6)}"/>`;
+  shapes += `<path d="${surface(tail, 1.2)}"/>`;
+  shapes += `<path d="${fuselage(11, 1.9, 0.14)}"/>`;
+  const prop = `<line x1="-4.4" y1="-11.8" x2="4.4" y2="-11.8" stroke="${c.fill}" stroke-width="1.3" stroke-linecap="round" opacity="0.85"/>`;
+  return unified(shapes, c, prop);
+}
+
+const SPECS: Record<Exclude<AircraftIconKind, 'turboprop' | 'light' | 'heli' | 'rearjet' | 'biz'>, JetSpec> = {
+  narrow: {
+    h: 24, w: 2.4,
+    wing: { half: 18, y: -8.5, rootChord: 11.5, tipChord: 2.6, sweep: 8.2 },
+    tail: { half: 7.2, y: 16, rootChord: 5.4, tipChord: 2, sweep: 3.2 },
+    engines: [{ x: 6.4, fwd: 3.4, len: 6.4, w: 2.8 }],
+    tipFin: true,
+  },
+  b737: {
+    h: 23, w: 2.3,
+    wing: { half: 17.5, y: -8, rootChord: 11, tipChord: 2.4, sweep: 7.8 },
+    tail: { half: 7, y: 15.4, rootChord: 5, tipChord: 2, sweep: 3 },
+    engines: [{ x: 5.6, fwd: 3, len: 6, w: 3.1 }],
+    tipFin: true,
+  },
+  regional: {
+    h: 19.5, w: 2.1,
+    wing: { half: 13.5, y: -6.6, rootChord: 8.6, tipChord: 2.2, sweep: 6 },
+    tail: { half: 5.8, y: 13, rootChord: 4.2, tipChord: 1.8, sweep: 2.6 },
+    engines: [{ x: 5, fwd: 2.8, len: 5.2, w: 2.5 }],
+  },
+  widebody: {
+    h: 28, w: 2.9,
+    wing: { half: 28, y: -10, rootChord: 16, tipChord: 3.4, sweep: 13.5 },
+    tail: { half: 11, y: 19.5, rootChord: 7.4, tipChord: 2.8, sweep: 5.2 },
+    engines: [{ x: 11, fwd: 4, len: 9.4, w: 3.8 }],
+  },
+  quad: {
+    h: 30, w: 3.1,
+    wing: { half: 30, y: -11, rootChord: 17, tipChord: 3.4, sweep: 15.5 },
+    tail: { half: 12, y: 21, rootChord: 7.8, tipChord: 3, sweep: 5.6 },
+    engines: [
+      { x: 9.4, fwd: 4, len: 9, w: 3.4 },
+      { x: 19, fwd: 4, len: 9, w: 3.4 },
+    ],
+  },
+};
+
+function planeHeli(c: Colors): string {
+  const style = `fill="${c.fill}" stroke="${c.stroke}" stroke-width="${c.sw}" stroke-linejoin="round"`;
+  return (
+    // Disco y palas del rotor principal
+    `<circle cx="0" cy="-2" r="19" fill="${c.fill}" opacity="0.07"/>` +
+    `<line x1="-20" y1="-2" x2="20" y2="-2" stroke="${c.stroke}" stroke-width="3.2" stroke-linecap="round" opacity="0.8"/>` +
+    `<line x1="-20" y1="-2" x2="20" y2="-2" stroke="${c.fill}" stroke-width="1.6" stroke-linecap="round"/>` +
+    `<line x1="0" y1="-22" x2="0" y2="18" stroke="${c.stroke}" stroke-width="3.2" stroke-linecap="round" opacity="0.8"/>` +
+    `<line x1="0" y1="-22" x2="0" y2="18" stroke="${c.fill}" stroke-width="1.6" stroke-linecap="round"/>` +
+    // Botalón de cola y rotor de cola
+    `<rect x="-1.3" y="4" width="2.6" height="19" rx="1.2" ${style}/>` +
+    `<line x1="-4" y1="22.5" x2="4" y2="22.5" stroke="${c.fill}" stroke-width="1.4" stroke-linecap="round"/>` +
+    // Cabina
+    `<ellipse cx="0" cy="-2" rx="5.6" ry="9" ${style}/>` +
+    `<circle cx="0" cy="-2" r="1.8" fill="${c.stroke}"/>`
+  );
+}
+
+function bodySvg(kind: AircraftIconKind, c: Colors): string {
+  switch (kind) {
+    case 'heli':
+      return planeHeli(c);
+    case 'light':
+      return renderLight(c);
+    case 'rearjet':
+      return renderRearJet(c, true);
+    case 'biz':
+      return renderRearJet(c, false);
+    case 'turboprop':
+      return renderTurboprop(c);
+    default:
+      return renderJet(SPECS[kind], c);
+  }
+}
+
+// Los aparatos pequeños se amplían un poco para que sigan siendo legibles en el mapa.
+const KIND_SCALE: Partial<Record<AircraftIconKind, number>> = {
+  regional: 1.25,
+  rearjet: 1.35,
+  biz: 1.6,
+  light: 1.5,
+  turboprop: 1.15,
+  narrow: 1.1,
+  b737: 1.1,
+};
+
+export function planeSvgForKind(kind: AircraftIconKind, dark: boolean, selected = false): string {
+  const c = colorsFor(dark, selected);
+  const k = KIND_SCALE[kind] ?? 1;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+    <g transform="translate(32 32)">${c.halo}<g transform="scale(${k})">${bodySvg(kind, c)}</g></g>
+  </svg>`;
 }

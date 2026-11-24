@@ -1,8 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { t, type Aircraft, type AircraftInfo, type StatsResponse } from '@flightflow/shared';
+import { t, type Aircraft, type AircraftInfo, type Metar, type StatsResponse } from '@flightflow/shared';
 import { TrafficList } from './TrafficList';
 import { StatsPanel } from './StatsPanel';
 import { AircraftDetail } from './AircraftDetail';
+import { AirportPanel } from './AirportPanel';
+import type { Airport } from '../data/airports';
+import { Segmented } from './ui/Segmented';
+import { ChevronDownIcon, SidebarIcon } from './ui/icons';
 
 interface Props {
   aircraft: Aircraft[];
@@ -13,6 +17,13 @@ interface Props {
   selectedAircraft: Aircraft | null;
   selectedAircraftInfo: AircraftInfo | null;
   trailLength: number;
+  following: boolean;
+  onToggleFollow: () => void;
+  airport: Airport | null;
+  isHomeAirport: boolean;
+  metar: Metar | null;
+  onCloseAirport: () => void;
+  onCenterAirport: () => void;
 }
 
 type Tab = 'traffic' | 'stats';
@@ -26,9 +37,16 @@ export function SidePanel({
   selectedAircraft,
   selectedAircraftInfo,
   trailLength,
+  following,
+  onToggleFollow,
+  airport,
+  isHomeAirport,
+  metar,
+  onCloseAirport,
+  onCenterAirport,
 }: Props) {
   const [tab, setTab] = useState<Tab>('traffic');
-  const [collapsed, setCollapsed] = useState(true);
+  const [collapsed, setCollapsed] = useState(selectedHex == null);
 
   // Auto-expandir cuando el usuario selecciona un avión (de null a algo)
   const prevHexRef = useRef<string | null>(selectedHex);
@@ -39,101 +57,94 @@ export function SidePanel({
     prevHexRef.current = selectedHex;
   }, [selectedHex]);
 
+  // Al abrir un aeropuerto, el panel se despliega.
+  const prevAirportRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (airport && prevAirportRef.current !== airport.icao) setCollapsed(false);
+    prevAirportRef.current = airport?.icao ?? null;
+  }, [airport]);
+
   const showDetail = selectedAircraft != null;
+  const showAirport = !showDetail && airport != null;
 
   return (
     <div className="sidepanel-container" data-collapsed={collapsed}>
-      {/* Botón colapsar/expandir — abajo (mobile) / izquierda (desktop) del panel */}
+      {/* Botón colapsar/expandir — a la derecha del panel (desktop) / encima (móvil) */}
       <button
         type="button"
         onClick={() => setCollapsed((c) => !c)}
         title={collapsed ? t('map.showPanel') : t('map.hidePanel')}
-        className="sidepanel-toggle glass flex items-center justify-center rounded-[12px] transition hover:brightness-110"
+        aria-label={collapsed ? t('map.showPanel') : t('map.hidePanel')}
+        aria-expanded={!collapsed}
+        className="sidepanel-toggle glass group flex items-center justify-center text-gray-500 transition-colors hover:text-gray-900 dark:text-[#8E8E93] dark:hover:text-white"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="#3f4661"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="h-5 w-5"
+        <ChevronDownIcon className="toggle-chevron sm:hidden" />
+        <span
+          className={`hidden h-10 w-10 items-center justify-center rounded-xl transition-colors sm:flex ${
+            collapsed
+              ? 'group-hover:bg-black/5 dark:group-hover:bg-white/8'
+              : 'bg-[#007AFF]/10 text-[#007AFF] dark:bg-[#0A84FF]/15 dark:text-[#0A84FF]'
+          }`}
         >
-          <polyline points="9 18 15 12 9 6" />
-        </svg>
+          <SidebarIcon className="h-5 w-5" />
+        </span>
       </button>
 
       {/* Panel principal */}
-      <div className="sidepanel glass flex flex-col rounded-[24px] sm:rounded-[30px] p-3 sm:p-4">
+      <div className="sidepanel glass flex flex-col rounded-2xl p-3">
         {showDetail ? (
-          /* Vista detalle de un avión seleccionado */
-          <div className="min-h-0 flex-1 overflow-y-auto">
+          <div className="min-h-0 flex-1 no-scrollbar overflow-y-auto">
             <AircraftDetail
               aircraft={selectedAircraft}
               info={selectedAircraftInfo}
               trailLength={trailLength}
+              following={following}
+              onToggleFollow={onToggleFollow}
               onClose={() => onSelect(null)}
             />
           </div>
+        ) : showAirport ? (
+          <div className="min-h-0 flex-1 no-scrollbar overflow-y-auto">
+            <AirportPanel
+              airport={airport}
+              isHome={isHomeAirport}
+              metar={metar}
+              aircraft={withPosition}
+              onClose={onCloseAirport}
+              onCenter={onCenterAirport}
+              onSelect={onSelect}
+            />
+          </div>
         ) : (
-          /* Vista por defecto: tabs Tráfico / Stats */
           <>
-            <div className="glass-inset relative grid h-[42px] grid-cols-2 overflow-hidden rounded-[10px] p-1">
-              <button
-                type="button"
-                onClick={() => setTab('traffic')}
-                className={`rounded-[8px] text-[16px] font-bold transition ${
-                  tab === 'traffic'
-                    ? 'glass-pill-active text-ink-tab dark:text-white'
-                    : 'text-ink-tab/70 dark:text-slate-400'
-                }`}
-              >
-                {t('map.tab.traffic')}
-              </button>
-              <button
-                type="button"
-                onClick={() => setTab('stats')}
-                className={`rounded-[8px] text-[16px] font-bold transition ${
-                  tab === 'stats'
-                    ? 'glass-pill-active text-ink-tab dark:text-white'
-                    : 'text-ink-tab/70 dark:text-slate-400'
-                }`}
-              >
-                {t('map.tab.stats')}
-              </button>
-            </div>
+            <Segmented<Tab>
+              label={t('map.tab.traffic')}
+              value={tab}
+              onChange={setTab}
+              options={[
+                { value: 'traffic', label: t('map.tab.traffic') },
+                { value: 'stats', label: t('map.tab.receiver') },
+              ]}
+            />
 
-            <div className="mt-4 flex items-end gap-8 px-1">
-              <div>
-                <span className="text-[25px] font-bold tabular-nums text-ink-tab dark:text-white">
-                  {aircraft.length}
-                </span>
-                <span className="ml-2 text-[16px] font-semibold text-ink-muted dark:text-slate-400">
-                  {t('map.aircraft')}
-                </span>
-              </div>
-              <div>
-                <span className="text-[25px] font-bold tabular-nums text-ink-tab dark:text-white">
-                  {withPosition.length}
-                </span>
-                <span className="ml-2 text-[16px] font-semibold text-ink-muted dark:text-slate-400">
-                  {t('map.positions')}
-                </span>
-              </div>
-            </div>
+            <p className="mb-2 mt-3 px-1 text-sm text-gray-500 dark:text-[#8E8E93]">
+              <span className="text-base font-semibold tabular-nums text-gray-900 dark:text-white">
+                {aircraft.length}
+              </span>{' '}
+              {t('map.aircraft')} ·{' '}
+              <span className="text-base font-semibold tabular-nums text-gray-900 dark:text-white">
+                {withPosition.length}
+              </span>{' '}
+              {t('map.positions')}
+            </p>
 
-            <div className="mt-3 min-h-0 flex-1 overflow-y-auto">
-              {tab === 'traffic' ? (
-                <TrafficList
-                  aircraft={aircraft}
-                  selectedHex={selectedHex}
-                  onSelect={onSelect}
-                />
-              ) : (
+            {tab === 'traffic' ? (
+              <TrafficList aircraft={aircraft} selectedHex={selectedHex} onSelect={onSelect} />
+            ) : (
+              <div className="min-h-0 flex-1 no-scrollbar overflow-y-auto">
                 <StatsPanel stats={stats} total={aircraft.length} withPos={withPosition.length} />
-              )}
-            </div>
+              </div>
+            )}
           </>
         )}
       </div>
